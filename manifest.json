@@ -1,0 +1,123 @@
+{
+    "name": "Nithara Apps",
+    "short_name": "Nithara",
+    "id": "com.sreejith.nithara",
+    "description": "Your centralized suite of professional financial and utility tools.",
+    "start_url": "./index.html",
+    "display": "standalone",
+    "background_color": "#0f172a",
+    "theme_color": "#0f172a",
+    "orientation": "portrait",
+    "categories": [
+        "finance",
+        "utilities"
+    ],
+    "icons": [
+        {
+            "src": "icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "icon-maskable.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Salary Details",
+            "url": "./salary/index.html",
+            "icons": [
+                {
+                    "src": "icon-192.png",
+                    "sizes": "192x192"
+                }
+            ]
+        },
+        {
+            "name": "Pay Revision",
+            "url": "./pay-revision/index.html",
+            "icons": [
+                {
+                    "src": "icon-192.png",
+                    "sizes": "192x192"
+                }
+            ]
+        },
+        {
+            "name": "Housing Loan",
+            "url": "./housing/index.html",
+            "icons": [
+                {
+                    "src": "icon-192.png",
+                    "sizes": "192x192"
+                }
+            ]
+        },
+        {
+            "name": "EMI Calculator",
+            "url": "./emi/index.html",
+            "icons": [
+                {
+                    "src": "icon-192.png",
+                    "sizes": "192x192"
+                }
+            ]
+        },
+        {
+            "name": "Pension/DCRG",
+            "url": "./dcrg/index.html",
+            "icons": [
+                {
+                    "src": "icon-192.png",
+                    "sizes": "192x192"
+                }
+            ]
+        },
+        {
+            "name": "SIP Calculator",
+            "url": "./sip/index.html",
+            "icons": [
+                {
+                    "src": "icon-192.png",
+                    "sizes": "192x192"
+                }
+            ]
+        },
+        {
+            "name": "Calculator",
+            "url": "./calculator/index.html",
+            "icons": [
+                {
+                    "src": "icon-192.png",
+                    "sizes": "192x192"
+                }
+            ]
+        }
+    ],
+    "screenshots": [
+        {
+            "src": "dcrg/screenshot.png",
+            "sizes": "1280x1280",
+            "type": "image/png",
+            "form_factor": "wide",
+            "label": "Apps Hub"
+        },
+        {
+            "src": "dcrg/screenshot.png",
+            "sizes": "1280x1280",
+            "type": "image/png",
+            "form_factor": "narrow",
+            "label": "Apps Hub Mobile"
+        }
+    ]
+}

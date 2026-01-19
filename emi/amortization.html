@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amortization Details - Dynamic EMI Calculator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <!-- Capacitor Handler -->
+    <script src="../capacitor-handler.js"></script>
+    <script src="../js/html2pdf.bundle.min.js"></script>
+    <script src="../js/pdf-helper.js"></script>
+</head>
+
+<body>
+    <div class="report-header">
+        <h1>EMI Amortization Report</h1>
+        <p id="printDate"></p>
+    </div>
+    <div class="background-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <div class="container amortization-page">
+        <header>
+            <a href="index.html" class="back-link">← Back to Calculator</a>
+            <h1>Amortization Details</h1>
+            <p id="loan-summary-text">Detailed breakdown of your loan repayment.</p>
+        </header>
+
+        <div class="view-toggle">
+            <button id="btn-monthly" class="toggle-btn active">Monthly</button>
+            <button id="btn-yearly" class="toggle-btn">Yearly</button>
+        </div>
+
+        <div class="table-wrapper">
+            <table id="amortization-table">
+                <thead>
+                    <tr>
+                        <th>No.</th>
+                        <th>Interest</th>
+                        <th>Principal</th>
+                        <th>Balance</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    <!-- Data injected here -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="button-group">
+            <button id="downloadBtn" class="download-button">
+                <span>📥</span> Download PDF
+            </button>
+            <button id="shareBtn" class="share-button">
+                <span>📤</span> Share Report
+            </button>
+        </div>
+
+        <footer class="footer">
+
+        </footer>
+    </div>
+
+    <script src="amortization.js"></script>
+</body>
+
+</html>

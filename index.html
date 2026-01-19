@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Apps Portal - Access all your finance and utility tools in one place">
+    <title>Nithara | Portal</title>
+    <link rel="stylesheet" href="style.css?v=2.0">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./service-worker.js');
+            });
+        }
+    </script>
+
+    <script src="capacitor.js"></script>
+    <script src="capacitor-handler.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1> apps for employees</h1>
+        </header>
+
+        <main>
+            <!-- Section 1: Service Matters -->
+            <h3 class="section-title">Service Matters</h3>
+            <div class="app-grid">
+                <!-- App Card: Pay Revision -->
+                <a href="./pay-revision/index.html" class="app-card">
+                    <div class="icon-wrapper">
+                        🔄
+                    </div>
+                    <h2 class="app-title">Pay Revision</h2>
+                </a>
+
+                <!-- App Card: Pension/DCRG -->
+                <a href="./dcrg/index.html" class="app-card">
+                    <div class="icon-wrapper">
+                        💰
+                    </div>
+                    <h2 class="app-title">Pension/DCRG</h2>
+                </a>
+
+                <!-- App Card: Salary Details -->
+                <a href="./salary/index.html" class="app-card">
+                    <div class="icon-wrapper">
+                        💵
+                    </div>
+                    <h2 class="app-title">Salary Details</h2>
+                </a>
+            </div>
+
+            <!-- Section 2: Others -->
+            <h3 class="section-title">Others</h3>
+            <div class="app-grid">
+                <!-- App Card: Housing Loan -->
+                <a href="./housing/index.html" class="app-card">
+                    <div class="icon-wrapper">
+                        🏠
+                    </div>
+                    <h2 class="app-title">Housing Loan</h2>
+                </a>
+
+                <!-- App Card: EMI -->
+                <a href="./emi/index.html" class="app-card">
+                    <div class="icon-wrapper">
+                        📊
+                    </div>
+                    <h2 class="app-title">EMI Calc</h2>
+                </a>
+
+                <!-- App Card: SIP -->
+                <a href="./sip/index.html" class="app-card">
+                    <div class="icon-wrapper">
+                        📈
+                    </div>
+                    <h2 class="app-title">SIP Calc</h2>
+                </a>
+
+                <!-- App Card: Calculator -->
+                <a href="./calculator/index.html" class="app-card">
+                    <div class="icon-wrapper">
+                        🔢
+                    </div>
+                    <h2 class="app-title">Calculator</h2>
+                </a>
+            </div>
+        </main>
+    </div>
+    <div class="footer-email" style="display: flex; flex-direction: column; gap: 0.5rem; align-items: center;">
+        <div>email: sreee.sreejith@gmail.com</div>
+    </div>
+</body>
+
+</html>

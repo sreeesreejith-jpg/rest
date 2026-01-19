@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apps | Salary Details</title>
+    <meta name="description"
+        content="Calculate your Gross and Net salary with interactive earnings and deductions tracking.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=2.0">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="../icon-192.png">
+    <meta name="theme-color" content="#10b981">
+    <script src="../capacitor.js"></script>
+    <script src="../capacitor-handler.js"></script>
+    <script src="../jspdf.umd.min.js"></script>
+    <script src="../jspdf.plugin.autotable.min.js"></script>
+    <script src="../pdf-helper.js"></script>
+</head>
+
+<body>
+    <div class="report-header">
+        <h1>Salary Calculation Report</h1>
+        <p id="printDate"></p>
+    </div>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <a href="../index.html" class="home-icon" title="Go Home">🏠</a>
+                <div class="header-text">
+                    <h1>Salary Details</h1>
+
+                </div>
+            </div>
+        </header>
+        <p class="placeholder-message"
+            style="text-align:center; margin:1rem 0; font-weight:500; color:var(--text-muted);">Fill the fields with
+            your own data.</p>
+
+        <div class="summary-cards">
+            <div class="summary-card gross-card main-summary">
+                <span class="label">Gross Salary</span>
+                <span id="gross-salary-val" class="value">0</span>
+            </div>
+            <div class="summary-details">
+                <div class="summary-card deduct-card">
+                    <span class="label">Deductions</span>
+                    <span id="total-deduction-val" class="value">0</span>
+                </div>
+                <div class="summary-card net-salary-card">
+                    <span class="label">Net Salary</span>
+                    <span id="net-salary-val" class="value">0</span>
+                </div>
+            </div>
+        </div>
+
+        <main class="salary-grid">
+            <!-- Earnings Section -->
+            <section class="salary-section earnings">
+                <div class="section-header earnings-header">
+                </div>
+                <div class="input-group">
+                    <div class="input-field">
+                        <label>Basic Pay</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="basic-pay" value="60700" step="100" autocomplete="off">
+                            <ul id="custom-dropdown" class="custom-dropdown">
+                                <!-- Items populated by JS -->
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="input-field">
+                        <label>DA %</label>
+                        <div class="input-with-result">
+                            <input type="number" id="da-perc" value="22" step="0.1">
+                            <span class="calculated-value" id="da-val">0</span>
+                        </div>
+                    </div>
+
+                    <div class="input-field">
+                        <label>HRA %</label>
+                        <div class="input-with-result">
+                            <input type="number" id="hra-perc" value="4" step="0.1">
+                            <span class="calculated-value" id="hra-val">0</span>
+                        </div>
+                    </div>
+
+                    <div class="input-field">
+                        <label>DA Pending %</label>
+                        <div class="input-with-result">
+                            <input type="number" id="da-pending-perc" placeholder="0" step="0.1">
+                            <span class="calculated-value" id="da-pending-val">0</span>
+                        </div>
+                    </div>
+
+                    <div class="input-field">
+                        <label>Others</label>
+                        <div class="input-with-result">
+                            <input type="number" id="other-earnings" placeholder="0">
+                        </div>
+                    </div>
+                </div>
+                <!-- Section Summary -->
+                <div class="section-summary gross-summary-row">
+                    <div class="input-field">
+                        <label>Gross Salary</label>
+                        <div class="input-with-result">
+                            <span class="spacer"></span>
+                            <span id="gross-salary-bottom" class="calculated-value total-val">0</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Deductions Section -->
+            <section class="salary-section deductions">
+                <div class="section-header deductions-header">
+                </div>
+                <div class="input-group">
+                    <div class="input-field">
+                        <label>GPF Sub.</label>
+                        <input type="number" id="gpf-sub" value="3700">
+                    </div>
+                    <div class="input-field">
+                        <label>GIS</label>
+                        <input type="number" id="gis" value="1600">
+                    </div>
+                    <div class="input-field">
+                        <label>SLI</label>
+                        <input type="number" id="sli" value="1100">
+                    </div>
+                    <div class="input-field">
+                        <label>Medisep</label>
+                        <input type="number" id="medisep" value="500">
+                    </div>
+                    <div class="input-field">
+                        <label>SLI Loan</label>
+                        <input type="number" id="sli-loan" value="1733">
+                    </div>
+                    <div class="input-field">
+                        <label>Others</label>
+                        <input type="number" id="other-deductions" placeholder="0">
+                    </div>
+                </div>
+                <!-- Section Summary -->
+                <div class="section-summary deduction-summary-row">
+                    <div class="input-field">
+                        <label>Deductions</label>
+                        <div class="input-with-result">
+                            <span id="total-deduction-bottom" class="calculated-value total-val">0</span>
+                        </div>
+                    </div>
+                    <div class="input-field highlight-net">
+                        <label>Net Salary</label>
+                        <div class="input-with-result">
+                            <span id="net-salary-bottom" class="calculated-value total-val">0</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <p class="disclaimer">* Calculations are approximate</p>
+
+        <!-- Section: Report Settings -->
+        <section class="salary-section report-card" id="report-settings-section">
+            <div class="section-header reports-header">
+                <h2>Report Settings</h2>
+            </div>
+            <div class="input-group">
+                <div class="input-field report-field">
+                    <label>Employee Name</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="reportName" placeholder="Optional">
+                    </div>
+                </div>
+                <div class="input-field report-field">
+                    <label>PEN Number</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="penNumber" placeholder="Optional">
+                    </div>
+                </div>
+                <div class="input-field report-field full-width">
+                    <label>School / Office Name</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="schoolName" placeholder="Optional">
+                    </div>
+                </div>
+            </div>
+
+            <div class="button-group report-buttons">
+                <button id="downloadBtn" class="download-button">
+                    <span>📥</span> Download PDF
+                </button>
+                <button id="shareBtn" class="share-button">
+                    <span>📤</span> Share Report
+                </button>
+            </div>
+        </section>
+
+        <footer>email: sreee.sreejith@gmail.com
+
+        </footer>
+    </div>
+
+    <script src="script.js?v=2.0"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').catch(err => console.log('SW fail', err));
+            });
+        }
+    </script>
+</body>
+
+</html>

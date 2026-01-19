@@ -1,0 +1,890 @@
+:root {
+    --primary: #3b82f6;
+    --primary-hover: #2563eb;
+    --primary-dark: #1e40af;
+    --secondary: #10b981;
+    --bg-color: #0f172a;
+    --card-bg: #1e293b;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --accent-gradient: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+    --font-family: 'Outfit', sans-serif;
+    --danger: #ef4444;
+    --success: #10b981;
+    --border: rgba(255, 255, 255, 0.1);
+    --radius-md: 12px;
+    --radius-lg: 16px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    font-family: var(--font-family);
+    background-color: var(--bg-color);
+    background-image:
+        radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.05) 0, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(139, 92, 246, 0.05) 0, transparent 50%);
+    color: var(--text-main);
+    min-height: 100vh;
+    padding: 16px;
+    line-height: 1.5;
+}
+
+/* Dashboard Section (Sticky Top Card) */
+.sticky-dashboard {
+    position: relative;
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    color: white;
+    padding: 20px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    max-width: 600px;
+    margin: 30px auto 0;
+    /* Changed margin to push it down if it's at the bottom */
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.home-button {
+    display: inline-block;
+    text-decoration: none;
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    color: var(--text-main);
+}
+
+.sticky-dashboard a {
+    text-decoration: none;
+    font-size: 1.25rem;
+    position: absolute;
+    left: 10px;
+    top: 10px;
+    z-index: 1001;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.main-benefit .label {
+    font-size: 0.85rem;
+    color: #94a3b8;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+    display: block;
+}
+
+.main-benefit .value {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--secondary);
+    display: block;
+    margin: 2px 0;
+    line-height: 1.1;
+}
+
+.main-benefit .sub-label {
+    font-size: 0.75rem;
+    color: #64748b;
+    display: block;
+    margin-top: 2px;
+}
+
+.secondary-highlight {
+    margin-top: 15px;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.secondary-highlight .value {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #60a5fa;
+    display: block;
+}
+
+.secondary-highlight .label {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+/* Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-item .label {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.stat-item .value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #f1f5f9;
+}
+
+/* Main Content Container */
+.container {
+    max-width: 600px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.main-content-padding {
+    padding-top: 20px !important;
+}
+
+.card {
+    margin-top: 10px;
+    /* Extra push down */
+}
+
+.placeholder-message {
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+.card {
+    background: var(--card-bg);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border: 1px solid var(--border);
+}
+
+/* Section Themes */
+.service-card {
+    border-top: 4px solid var(--primary);
+}
+
+.calc-card {
+    border-top: 4px solid #10b981;
+    /* Emerald */
+    background: linear-gradient(135deg, #064e3b 0%, #0f172a 100%) !important;
+}
+
+.calc-card h2::before {
+    background: #10b981;
+}
+
+.summary-card {
+    border-top: 4px solid #8b5cf6;
+    /* Violet */
+    background: linear-gradient(135deg, #2e1065 0%, #0f172a 100%) !important;
+}
+
+.summary-card .value {
+    color: #a78bfa !important;
+}
+
+.card h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.card h2::before {
+    content: '';
+    display: inline-block;
+    width: 4px;
+    height: 1.5rem;
+    background: var(--primary);
+    border-radius: 2px;
+}
+
+/* Input Fields */
+.input-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+@media (max-width: 480px) {
+    .input-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.input-group label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+}
+
+.input-wrapper input {
+    width: 100%;
+    padding: 14px;
+    border-radius: var(--radius-md);
+    border: 2px solid var(--border);
+    font-family: inherit;
+    font-size: 1.1rem;
+    font-weight: 600;
+    background: #1e293b;
+    color: var(--text-main);
+    transition: all 0.2s;
+    outline: none;
+    text-align: center;
+}
+
+.input-wrapper input:focus {
+    background: #27354a;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.input-wrapper.readonly input {
+    background: rgba(15, 23, 42, 0.3);
+    border-color: rgba(255, 255, 255, 0.05);
+    color: var(--text-muted);
+    cursor: default;
+}
+
+.input-hint {
+    display: block;
+    font-size: 0.8rem;
+    margin-top: 6px;
+    font-style: italic;
+    line-height: 1.3;
+    text-align: left;
+    font-weight: 700;
+    animation: red-white-blink 1s infinite alternate;
+}
+
+@keyframes red-white-blink {
+    from {
+        color: #ff4d4d;
+    }
+
+    /* Red */
+    to {
+        color: #ffffff;
+    }
+
+    /* White */
+}
+
+#calcReducedPension {
+    color: white !important;
+}
+
+/* Print Configuration Styles */
+.print-config {
+    margin-top: 25px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: left;
+}
+
+.print-field {
+    margin-bottom: 15px;
+}
+
+.print-field label {
+    display: block;
+    font-size: 0.8rem;
+    color: #94a3b8;
+    margin-bottom: 5px;
+}
+
+.print-field input {
+    width: 100%;
+    padding: 10px;
+    background: #1e293b;
+    border: 1px solid #3b82f6;
+    border-radius: 8px;
+    color: white;
+    outline: none;
+}
+
+.print-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+}
+
+.options-label {
+    width: 100%;
+    font-size: 0.8rem;
+    color: #94a3b8;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.print-options label {
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 8px 12px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: background 0.2s;
+}
+
+.print-options label:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.print-options input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+/* Report Header (Print only) */
+.report-header {
+    display: none;
+    text-align: center;
+    margin-bottom: 30px;
+    border-bottom: 2px solid #2563eb;
+    padding-bottom: 20px;
+}
+
+.report-header h1 {
+    font-size: 1.5rem;
+    color: #2563eb;
+    margin-bottom: 5px;
+}
+
+.report-header p {
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+.download-button,
+.share-button {
+    padding: 12px 10px;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: transform 0.2s, background 0.2s;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    flex: 1;
+}
+
+.download-button {
+    background: #4f46e5;
+    color: white;
+}
+
+.share-button {
+    background: #10b981;
+    color: white;
+}
+
+.button-group {
+    display: flex;
+    gap: 12px;
+    margin-top: 25px;
+    width: 100%;
+}
+
+.download-button:active,
+.share-button:active {
+    transform: scale(0.95);
+}
+
+/* --- Common Print/PDF Styles --- */
+@media print {
+    body {
+        background: white !important;
+        background-image: none !important;
+        color: black !important;
+    }
+
+    .home-button,
+    .button-group,
+    .disclaimer,
+    .developer-credit,
+    .placeholder-message,
+    .custom-dropdown,
+    #shareBtn,
+    #printBtn,
+    .print-config,
+    .input-hint {
+        display: none !important;
+    }
+
+    .report-header {
+        display: block !important;
+        border-bottom: 2px solid black;
+        margin-bottom: 10px !important;
+        padding-bottom: 5px !important;
+    }
+
+    .card,
+    .sticky-dashboard {
+        background: white !important;
+        border: 1px solid black !important;
+        break-inside: avoid;
+    }
+
+    h1,
+    h2,
+    h3,
+    .report-header h1 {
+        background: none !important;
+        -webkit-text-fill-color: black !important;
+        color: black !important;
+    }
+
+    * {
+        color: black !important;
+        background-color: transparent !important;
+        box-shadow: none !important;
+        text-shadow: none !important;
+    }
+}
+
+/* Specific styles for html2pdf which uses .pdf-mode class */
+body.pdf-mode {
+    background: white !important;
+    color: black !important;
+    width: 760px !important;
+    padding: 12px !important;
+}
+
+body.pdf-mode * {
+    color: black !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    -webkit-text-fill-color: black !important;
+    text-shadow: none !important;
+    box-shadow: none !important;
+    border-color: #000 !important;
+    animation: none !important;
+}
+
+body.pdf-mode .container {
+    max-width: 100% !important;
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+
+body.pdf-mode .detail-value {
+    color: black !important;
+    font-weight: bold !important;
+    font-size: 1.1rem !important;
+}
+
+body.pdf-mode .home-button,
+body.pdf-mode .button-group,
+body.pdf-mode .disclaimer,
+body.pdf-mode .developer-credit,
+body.pdf-mode .placeholder-message,
+body.pdf-mode .custom-dropdown,
+body.pdf-mode #shareBtn,
+body.pdf-mode #printBtn,
+body.pdf-mode .print-config,
+body.pdf-mode .input-hint {
+    display: none !important;
+}
+
+body.pdf-mode .report-header {
+    display: block !important;
+    text-align: center;
+    border-bottom: 2px solid black !important;
+    margin-bottom: 20px !important;
+    padding-bottom: 10px !important;
+}
+
+body.pdf-mode .card,
+body.pdf-mode .sticky-dashboard {
+    background: white !important;
+    border: 1px solid black !important;
+    border-radius: 4px !important;
+    margin-bottom: 10px !important;
+    padding: 12px !important;
+    page-break-inside: avoid;
+    max-width: none !important;
+}
+
+body.pdf-mode .input-group input {
+    background: transparent !important;
+    border: none !important;
+    border-bottom: none !important;
+    text-align: right !important;
+    padding: 2px !important;
+    font-weight: bold !important;
+}
+
+body.pdf-mode h2 {
+    color: black !important;
+    border-bottom: 1px solid black !important;
+    padding-bottom: 5px;
+    font-size: 1.2rem !important;
+}
+
+body.pdf-mode h2::before {
+    display: none !important;
+}
+
+/* Layout Persistence */
+body.pdf-mode .input-grid,
+body.pdf-mode .stats-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 15px !important;
+}
+
+body.pdf-mode .detail-item {
+    border-bottom: 1px solid #eee !important;
+}
+
+
+
+/* Footer & Extras */
+.disclaimer {
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--danger);
+    margin-top: 20px;
+    font-weight: 600;
+    font-style: italic;
+}
+
+.developer-credit {
+    text-align: center;
+    padding: 20px 0;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+/* Animations */
+.blinking {
+    animation: blink-green 2s infinite ease-in-out;
+}
+
+@keyframes blink-green {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.8;
+        transform: scale(1.02);
+    }
+}
+
+@media (max-width: 480px) {
+    .sticky-dashboard {
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+
+    .main-benefit .value {
+        font-size: 1.8rem;
+    }
+
+    .secondary-highlight .value {
+        font-size: 1.4rem;
+    }
+}
+
+/* --- Custom Dropdown Styles --- */
+.input-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.custom-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    max-height: 250px;
+    /* LIMIT HEIGHT! */
+    overflow-y: auto;
+    background: #0f172a;
+    /* Deeper Midnight Blue */
+    border: 1px solid #3b82f6;
+    /* Solid Blue Border */
+    border-radius: 0.5rem;
+    padding: 0;
+    margin-top: 5px;
+    z-index: 1000;
+    list-style: none;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.7);
+    display: none;
+    /* Hidden by default */
+}
+
+.custom-dropdown.show {
+    display: block;
+}
+
+.custom-dropdown li {
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    font-size: 1.1rem;
+    color: #cbd5e1;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    text-align: center;
+}
+
+.custom-dropdown li:last-child {
+    border-bottom: none;
+}
+
+.custom-dropdown li:hover,
+.custom-dropdown li.active {
+    background: rgba(59, 130, 246, 0.2);
+    color: white;
+}
+
+/* Calculation Details List */
+.details-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.detail-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.detail-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.detail-label {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+}
+
+.detail-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.detail-desc {
+    display: block;
+    width: 100%;
+    font-size: 0.75rem;
+    color: #475569;
+    margin-top: 4px;
+    text-align: right;
+}
+
+.detail-step {
+    display: block;
+    width: 100%;
+    font-size: 0.85rem;
+    color: #94a3b8;
+    /* Lighter than desc for visibility */
+    text-align: right;
+    margin-top: 6px;
+    font-weight: 500;
+}
+
+.detail-item {
+    flex-wrap: wrap;
+}
+
+.detail-label,
+.detail-value {
+    width: 50%;
+}
+
+.detail-value {
+    text-align: right;
+}
+
+.highlight-factor {
+    color: #ffffff;
+    /* White as requested */
+    font-weight: 700;
+    font-size: 0.9em;
+    padding: 0 4px;
+}
+
+/* New Grouping Styles */
+.detail-group-header {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: #475569;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-top: 10px;
+    padding-bottom: 5px;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.05);
+}
+
+.detail-group-header:first-child {
+    margin-top: 0;
+}
+
+
+.text-accent {
+    color: #60a5fa !important;
+}
+
+.text-success {
+    color: #34d399 !important;
+}
+
+body.pdf-mode .text-success,
+body.pdf-mode .text-accent,
+body.pdf-mode .text-danger,
+body.pdf-mode .text-primary,
+body.pdf-mode .value,
+body.pdf-mode .detail-value,
+body.pdf-mode .calculated-value,
+body.pdf-mode .pulse,
+body.pdf-mode .highlight,
+body.pdf-mode span[class*="text-"],
+body.pdf-mode span[id*="val"],
+body.pdf-mode #calcReducedPension {
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
+    visibility: visible !important;
+    display: inline-block !important;
+    /* Ensure it occupies space */
+    opacity: 1 !important;
+    font-weight: bold !important;
+}
+
+@media print {
+
+    .text-success,
+    .text-accent,
+    .text-danger,
+    .text-primary,
+    .value,
+    .detail-value,
+    .calculated-value,
+    .pulse,
+    .highlight,
+    span[class*="text-"],
+    span[id*="val"] {
+        color: #000000 !important;
+        -webkit-text-fill-color: #000000 !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+}
+
+/* Layout Fix for PDF rows */
+body.pdf-mode .detail-item,
+body.pdf-mode .result-row,
+body.pdf-mode .revision-row {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    align-items: center !important;
+    border-bottom: 1px solid #eee !important;
+    padding: 10px 0 !important;
+}
+
+body.pdf-mode .detail-label,
+body.pdf-mode .result-row .label {
+    flex: 1 !important;
+    width: auto !important;
+    text-align: left !important;
+    color: black !important;
+}
+
+body.pdf-mode .detail-value,
+body.pdf-mode .result-row .value {
+    flex: 0 0 auto !important;
+    width: auto !important;
+    min-width: 120px !important;
+    text-align: right !important;
+    color: black !important;
+    font-weight: bold !important;
+}
+
+body.pdf-mode .detail-step,
+body.pdf-mode .detail-desc {
+    width: 100% !important;
+    text-align: right !important;
+    color: #666 !important;
+    font-size: 0.8rem !important;
+    margin-top: 4px !important;
+}
+
+/* Report Card Specifics */
+.report-card {
+    border-top: 4px solid #3b82f6 !important;
+    background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%) !important;
+    margin-top: 2rem !important;
+}
+
+.report-card h2 {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+    color: #60a5fa !important;
+}
+
+.report-card .input-wrapper input {
+    text-align: left !important;
+    padding-left: 1rem !important;
+}
+
+.full-width {
+    grid-column: 1 / -1;
+}
+
+@media (max-width: 480px) {
+    .report-card .input-grid {
+        grid-template-columns: 1fr !important;
+        gap: 0.25rem;
+    }
+}

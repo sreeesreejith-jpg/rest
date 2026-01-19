@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Housing Loan EMI Calculator</title>
+
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="Calculate your housing loan EMI with plot and construction costs">
+    <meta name="theme-color" content="#6366f1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Housing EMI">
+
+    <!-- Icons -->
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+    <link rel="apple-touch-icon" href="icon-192.png">
+
+    <!-- Manifest -->
+    <link rel="manifest" href="manifest.json">
+
+    <link rel="stylesheet" href="style.css?v=2.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet">
+    <script src="../capacitor.js"></script>
+    <script src="../capacitor-handler.js"></script>
+    <script src="../jspdf.umd.min.js"></script>
+    <script src="../jspdf.plugin.autotable.min.js"></script>
+    <script src="../pdf-helper.js"></script>
+</head>
+
+<body>
+    <div class="background-animate"></div>
+    <div class="container compact-mode">
+        <header class="mini-header">
+            <div class="header-content">
+                <a href="../index.html" class="home-icon" title="Go Home">🏠</a>
+                <h1>Housing Loan EMI</h1>
+            </div>
+        </header>
+
+        <p class="placeholder-message"
+            style="text-align:center; margin:1rem 0; font-weight:500; color:var(--text-muted);">Fill the fields with
+            your own data.</p>
+
+
+        <main class="single-card-layout">
+            <div class="card compact-card">
+                <!-- Result at the very top -->
+                <div class="top-result">
+                    <label>MONTHLY EMI</label>
+                    <div id="monthly-emi" class="emi-red-bold">0</div>
+                </div>
+
+                <div class="compact-grid">
+                    <!-- Plot Section -->
+                    <div class="input-section-compact">
+                        <h3>Plot Purchase</h3>
+                        <div class="dense-input-group">
+                            <label for="land-area">Cents</label>
+                            <input type="number" id="land-area" step="0.01">
+                        </div>
+                        <div class="dense-input-group">
+                            <label for="cost-per-cent">Cost/Cent</label>
+                            <input type="number" id="cost-per-cent" step="1">
+                        </div>
+                        <div class="dense-input-group">
+                            <label for="other-expenses">Other Expenses</label>
+                            <input type="number" id="other-expenses" step="1">
+                        </div>
+                    </div>
+
+                    <!-- Construction Section -->
+                    <div class="input-section-compact">
+                        <h3>Construction</h3>
+                        <div class="dense-input-group">
+                            <label for="built-up-area">Sq.Ft</label>
+                            <input type="number" id="built-up-area" step="1">
+                        </div>
+                        <div class="dense-input-group">
+                            <label for="cost-per-sqft">Cost/Sq.Ft</label>
+                            <input type="number" id="cost-per-sqft" step="1">
+                        </div>
+                    </div>
+
+                    <!-- Salary Section -->
+                    <div class="input-section-compact">
+                        <h3>Salary Details</h3>
+                        <div class="dense-input-group">
+                            <label for="net-salary">Net Salary</label>
+                            <input type="text" id="net-salary" list="salary-defaults" value="67,539">
+                            <datalist id="salary-defaults">
+                                <option value="67,539">
+                                <option value="75,430">
+                                <option value="80,000">
+                            </datalist>
+                        </div>
+                        <div class="dense-input-group">
+                            <label for="balance-salary">BALANCE AFTER EMI</label>
+                            <input type="text" id="balance-salary" readonly title="Net Salary - EMI">
+                        </div>
+
+                    </div>
+
+                    <!-- Rent Section -->
+                    <div class="input-section-compact">
+                        <h3>Rent Details</h3>
+                        <div class="dense-input-group">
+                            <label for="rent">Rent</label>
+                            <input type="text" id="rent" list="rent-defaults" placeholder="Enter rent">
+                            <datalist id="rent-defaults">
+                                <option value="10,000">
+                                <option value="11,000">
+                                <option value="12,000">
+                                <option value="13,000">
+                                <option value="14,000">
+                                <option value="15,000">
+                            </datalist>
+                        </div>
+                        <div class="dense-input-group">
+                            <label for="balance-after-rent">BALANCE AFTER RENT</label>
+                            <input type="text" id="balance-after-rent" readonly title="Net Salary - Rent">
+                        </div>
+                    </div>
+
+                    <!-- Final Balance Section -->
+                    <div class="input-section-compact">
+                        <div class="dense-input-group" style="grid-column: span 2;">
+                            <label for="final-balance" style="color: var(--text-main); font-weight: bold;">EXCESS FOR
+                                HOUSING LOAN</label>
+                            <input type="text" id="final-balance" readonly
+                                title="Balance After Rent - Balance After EMI"
+                                style="border-color: var(--text-main); font-weight: bold;">
+                        </div>
+                    </div>
+
+
+                </div>
+
+                <div class="fixed-info-bar">
+                    <div class="loan-total-bottom">Total Loan: <span id="total-principal-bottom">0</span></div>
+                    <div class="loan-details-bottom">30 Years @ 7.5% Interest</div>
+                </div>
+            </div>
+        </main>
+
+        <div class="button-group" style="display: flex; gap: 0.8rem; margin-top: 1.2rem;">
+            <button id="downloadBtn" class="download-button"
+                style="flex: 1; padding: 0.7rem; border-radius: 8px; background: #6366f1; color: white; border: none; font-weight: bold; cursor: pointer;">
+                <span>📥</span> Download PDF
+            </button>
+            <button id="shareBtn" class="share-button"
+                style="flex: 1; padding: 0.7rem; border-radius: 8px; background: #10b981; color: white; border: none; font-weight: bold; cursor: pointer;">
+                <span>📤</span> Share Report
+            </button>
+        </div>
+
+        <p class="disclaimer">* Calculations are approximate</p>
+        <footer>email: sreee.sreejith@gmail.com
+
+        </footer>
+    </div>
+    <script src="script.js?v=2.0"></script>
+
+    <!-- PWA Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./service-worker.js')
+                    .then(registration => {
+                        console.log('Service Worker registered successfully:', registration.scope);
+                    })
+                    .catch(error => {
+                        console.log('Service Worker registration failed:', error);
+                    });
+            });
+        }
+    </script>
+</body>
+
+</html>

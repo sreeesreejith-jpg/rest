@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apps | Pay Revision</title>
+    <meta name="description"
+        content="Calculate pay revision benefits including fitment, DA merger, and HRA adjustments.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=2.2">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="../icon-192.png">
+    <meta name="theme-color" content="#3b82f6">
+    <script src="../capacitor.js"></script>
+    <script src="../capacitor-handler.js"></script>
+    <script src="../jspdf.umd.min.js"></script>
+    <script src="../jspdf.plugin.autotable.min.js"></script>
+    <script src="../pdf-helper.js"></script>
+</head>
+
+<body>
+    <div class="report-header">
+        <h1>Pay Revision Report</h1>
+        <p id="printDate"></p>
+    </div>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <a href="../index.html" class="home-icon" title="Go Home">🏠</a>
+                <div class="header-text">
+                    <h1>Pay Revision</h1>
+                </div>
+            </div>
+        </header>
+        <!-- Step 1: Data Entry -->
+        <div class="step-header" style="margin: 0.5rem 0 0.85rem 0; display: flex; align-items: center; gap: 0.75rem;">
+            <div
+                style="background: var(--primary); color: white; width: 26px; height: 26px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 0.85rem; flex-shrink: 0; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);">
+                1</div>
+            <div style="display: flex; flex-direction: column;">
+                <span
+                    style="font-size: 0.8rem; font-weight: 800; color: #ffffff; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1;">Employee
+                    Details</span>
+
+            </div>
+        </div>
+
+        <!-- Professional Configuration Dashboard -->
+        <div class="input-main-card"
+            style="padding: 1.5rem; background: linear-gradient(145deg, rgba(30, 41, 59, 1), rgba(15, 23, 42, 1)); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 1.25rem; box-shadow: 0 12px 40px rgba(0,0,0,0.4);">
+            <div class="dashboard-header"
+                style="margin-bottom: 1.5rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 1rem; align-items: end;">
+                <!-- 1. Primary Input Group -->
+                <div
+                    style="display: flex; flex-direction: column; align-items: center; gap: 0.6rem; text-align: center;">
+                    <label
+                        style="font-size: 0.7rem; font-weight: 800; color: #ffffff; text-transform: uppercase; letter-spacing: 1px;">BP
+                        on 01/07/2024 <span style="color: #ef4444; font-weight: 900;">*</span></label>
+                    <div class="input-wrapper" style="width: 100%; max-width: 180px;">
+                        <input type="number" id="basic-pay-in" placeholder="Select" autocomplete="off"
+                            style="width: 100%; font-size: 1.2rem; height: 50px; border-radius: 0.8rem; border: 2.5px solid var(--primary); background: rgba(0,0,0,0.25); color: #fff; font-weight: 800; padding: 0 0.5rem; text-align: center; box-shadow: 0 0 15px rgba(59, 130, 246, 0.15);">
+                        <ul id="custom-dropdown" class="custom-dropdown"></ul>
+                    </div>
+                </div>
+
+                <!-- 2. Revised BP Preview (Conditional) -->
+                <div id="revised-bp-container"
+                    style="display: none; flex-direction: column; align-items: center; gap: 0.6rem; text-align: center;">
+                    <label
+                        style="font-size: 0.7rem; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 1px;">Revised
+                        BP on 01.07.2024</label>
+                    <div
+                        style="width: 100%; max-width: 180px; height: 50px; border-radius: 0.8rem; border: none; background: rgba(59, 130, 246, 0.15); display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 20px rgba(59, 130, 246, 0.1), 0 0 15px rgba(59, 130, 246, 0.2);">
+                        <span id="revised-bp-val"
+                            style="font-size: 1.4rem; color: #fff; font-weight: 900; line-height: 1; text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);"></span>
+                    </div>
+                </div>
+
+                <!-- 3. Present Basic Pay (New) (Conditional) -->
+                <div id="present-bp-container"
+                    style="display: none; flex-direction: column; align-items: center; gap: 0.6rem; text-align: center;">
+                    <label id="present-bp-label"
+                        style="font-size: 0.7rem; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 1px;">Revised
+                        BP on</label>
+                    <div
+                        style="width: 100%; max-width: 180px; height: 50px; border-radius: 0.8rem; border: none; background: rgba(59, 130, 246, 0.15); display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 20px rgba(59, 130, 246, 0.1), 0 0 15px rgba(59, 130, 246, 0.2);">
+                        <span id="header-present-bp"
+                            style="font-size: 1.4rem; color: #fff; font-weight: 900; line-height: 1; text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Configuration Parameters -->
+            <!-- Grouped Configuration Parameters -->
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                <!-- Group B: Pay Progression (Moved Up) -->
+                <div class="config-group-card"
+                    style="background: rgba(139, 92, 246, 0.05); border-radius: 1rem; padding: 1.25rem; border: 1px solid rgba(139, 92, 246, 0.2); display: flex; flex-direction: column; gap: 1rem;">
+
+
+                    <!-- Increment Month -->
+                    <div class="input-field row-input"
+                        style="display: grid; grid-template-columns: 1fr 140px; gap: 1rem; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.03); padding-bottom: 0.75rem;">
+                        <label style="font-size: 0.9rem; color: var(--text-main); font-weight: 700;">Increment
+                            Month <span style="color: #ef4444; font-weight: 900;">*</span></label>
+                        <!-- Custom Dropdown for Increment Month -->
+                        <div class="input-wrapper" style="width: 100%; max-width: 140px;">
+                            <input type="text" id="increment-month-display" placeholder="Select" readonly
+                                style="text-align: center; height: 36px; font-size: 0.9rem; border-radius: 0.5rem; background: rgba(0,0,0,0.2); color: white; border: 1px solid rgba(59, 130, 246, 0.3); font-weight: 700; cursor: pointer; width: 100%;">
+                            <input type="hidden" id="increment-month">
+                            <ul id="increment-month-dropdown" class="custom-dropdown"></ul>
+                        </div>
+                    </div>
+
+                    <!-- Higher Grade -->
+                    <div class="input-field row-input"
+                        style="display: grid; grid-template-columns: 1fr 100px; gap: 1rem; align-items: center;">
+                        <label for="grade-check"
+                            style="font-size: 0.9rem; color: var(--text-main); font-weight: 700;">If got Grade after
+                            1/7/24?</label>
+                        <div style="display: flex; justify-content: center;">
+                            <input type="checkbox" id="grade-check" autocomplete="off"
+                                style="width: 20px; height: 20px; accent-color: #8b5cf6;">
+                        </div>
+                    </div>
+
+                    <!-- Grade Month & Year -->
+                    <div id="grade-details-container"
+                        style="display: none; flex-direction: column; gap: 0.75rem; background: rgba(139, 92, 246, 0.1); padding: 1rem; border-radius: 0.75rem; border: 1px solid rgba(139, 92, 246, 0.2);">
+                        <div class="input-field row-input"
+                            style="display: grid; grid-template-columns: 1fr 140px; gap: 1rem; align-items: center;">
+                            <label style="font-size: 0.85rem; color: var(--text-main); font-weight: 700;">Grade
+                                Year</label>
+                            <select id="grade-year" autocomplete="off"
+                                style="text-align: center; height: 32px; font-size: 0.85rem; background: rgba(0,0,0,0.2); color: white; border-radius: 0.4rem; border: 1px solid #8b5cf6;">
+                                <option value="" selected disabled>Select Year</option>
+                                <option value="2024">2024</option>
+                                <option value="2025">2025</option>
+                                <option value="2026">2026</option>
+                            </select>
+                        </div>
+                        <div class="input-field row-input"
+                            style="display: grid; grid-template-columns: 1fr 140px; gap: 1rem; align-items: center;">
+                            <label style="font-size: 0.85rem; color: var(--text-main); font-weight: 700;">Grade
+                                Month</label>
+                            <!-- Custom Dropdown for Grade Month -->
+                            <div class="input-wrapper" style="width: 100%; max-width: 140px;">
+                                <input type="text" id="grade-month-display" placeholder="Select" readonly
+                                    style="text-align: center; height: 32px; font-size: 0.85rem; background: rgba(0,0,0,0.2); color: white; border-radius: 0.4rem; border: 1px solid #8b5cf6; cursor: pointer; width: 100%;">
+                                <input type="hidden" id="grade-month">
+                                <ul id="grade-month-dropdown" class="custom-dropdown"></ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Group A: Fixation Parameters (Moved Down) -->
+                <div class="config-group-card"
+                    style="background: rgba(59, 130, 246, 0.05); border-radius: 1rem; padding: 1.25rem; border: 1px solid rgba(59, 130, 246, 0.2); display: flex; flex-direction: column; gap: 1rem;">
+
+
+                    <div class="input-field row-input"
+                        style="display: grid; grid-template-columns: 1fr 100px; gap: 1rem; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.03); padding-bottom: 0.75rem;">
+                        <label style="color: var(--text-main); font-weight: 700; font-size: 0.9rem;">Fitment
+                            Percentage</label>
+                        <div class="input-wrapper" style="width: 100%;">
+                            <div class="input-with-val" style="margin: 0;">
+                                <input type="number" id="fitment-perc" value="7" step="0.5" readonly
+                                    style="text-align: center; height: 36px; font-size: 1rem; border-color: var(--primary); background: rgba(0,0,0,0.2); color: white; cursor: pointer;">
+                                <span class="unit" style="font-weight: 800; color: var(--primary);">%</span>
+                            </div>
+                            <ul id="fitment-dropdown" class="custom-dropdown"></ul>
+                        </div>
+                    </div>
+
+                    <div class="weightage-logic-group" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                        <div class="input-field row-input"
+                            style="display: grid; grid-template-columns: 1fr 100px; gap: 1rem; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.03); padding-bottom: 0.75rem;">
+                            <label for="weightage-check"
+                                style="font-size: 0.9rem; color: var(--text-muted); font-weight: 600;">If Service
+                                Weightage allowed?</label>
+                            <div style="display: flex; justify-content: center;">
+                                <input type="checkbox" id="weightage-check"
+                                    style="width: 20px; height: 20px; accent-color: var(--primary);">
+                            </div>
+                        </div>
+                        <div id="weightage-container"
+                            style="display: none; flex-direction: column; gap: 0.75rem; background: rgba(139, 92, 246, 0.1); padding: 1rem; border-radius: 0.75rem; border: 1px solid rgba(139, 92, 246, 0.2);">
+                            <div class="input-field row-input"
+                                style="display: grid; grid-template-columns: 1fr 100px; gap: 1rem; align-items: center;">
+                                <label style="font-size: 0.9rem; color: var(--text-main); font-weight: 700;">Completed
+                                    Years
+                                    of Service</label>
+                                <div class="input-wrapper" style="width: 100%;">
+                                    <div class="input-with-val" style="margin: 0;">
+                                        <input type="number" id="years-service" placeholder="Years" step="1" min="0"
+                                            autocomplete="off"
+                                            style="text-align: center; height: 36px; font-size: 1rem; border-color: var(--primary); background: rgba(0,0,0,0.2);">
+                                        <span class="unit" style="font-weight: 800;">Yrs</span>
+                                    </div>
+                                    <ul id="years-dropdown" class="custom-dropdown"></ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Progression Results (Timeline) -->
+
+
+        <!-- Step 2: Visualization -->
+        <!-- Divider / Result Header -->
+        <div class="results-divider">
+            <div class="divider-line"></div>
+            <div class="divider-content">
+                <div class="divider-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 5v14M5 12l7 7 7-7" />
+                    </svg>
+                </div>
+                <span class="divider-text">Calculation Results</span>
+            </div>
+            <div class="divider-line"></div>
+        </div>
+
+        <main class="revision-grid">
+            <!-- Left Side: Pay Fixation Details -->
+            <section class="revision-section before" style="display: flex; flex-direction: column;">
+                <div class="section-header before-header"
+                    style="border-bottom: 2px solid var(--text-muted); background: rgba(255, 255, 255, 0.02);">
+                    <h2 style="color: #ffffff;">Pay Fixation (01/07/2024)</h2>
+                </div>
+                <div class="input-group"
+                    style="padding: 1rem; display: flex; flex-direction: column; gap: 0.5rem; flex: 1;">
+                    <div class="result-row">
+                        <span class="label">Basic Pay</span>
+                        <span id="res-bp-new" class="value">0</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="label">DA Merged (31%)</span>
+                        <span id="res-da-merged" class="value">0</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="label" id="label-res-fitment">Fitment Amount</span>
+                        <span id="res-fitment" class="value">0</span>
+                    </div>
+                    <div class="result-row" id="res-weightage-row" style="display: none;">
+                        <span class="label" id="label-res-weightage">Service Weightage</span>
+                        <span id="res-weightage" class="value">0</span>
+                    </div>
+                    <div class="result-row highlight-row">
+                        <span class="label" style="font-weight: 700; color: #ffffff;">Actual Total</span>
+                        <span id="res-actual-total" class="value" style="font-weight: 800;">0</span>
+                    </div>
+                    <div class="result-row"
+                        style="background: rgba(59, 130, 246, 0.05); padding: 0.75rem 0.5rem; border-radius: 0.5rem; border: 1px dashed rgba(59, 130, 246, 0.3); grid-template-columns: 1fr 110px;">
+                        <span class="label" style="font-size: 0.75rem; color: #ffffff; font-weight: 700;">Fixed
+                            BP (01/07/24)</span>
+                        <span id="res-bp-fixed" class="value highlight"
+                            style="font-size: 1.15rem; font-weight: 800;">0</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Detailed Progression Results (Timeline) -->
+            <div id="progression-timeline"
+                style="margin: 0 0 1.25rem 0; width: 100%; display: none; flex-direction: column; gap: 0.5rem;">
+                <div
+                    style="background: var(--input-bg); border-left: 4px solid var(--primary); padding: 0.75rem 1rem; border-radius: 0.4rem;">
+                    <h4
+                        style="font-size: 0.75rem; color: #ffffff; text-transform: uppercase; margin-bottom: 0.5rem; letter-spacing: 0.5px;">
+                        Pay Stages</h4>
+                    <div id="timeline-steps" style="display: flex; flex-direction: column; gap: 0.4rem;">
+                        <!-- Timeline items injected here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side: Present Salary Details (Conditional) -->
+            <section id="present-salary-container" class="revision-section after"
+                style="display: none; flex-direction: column;">
+                <div class="section-header after-header">
+                    <h2>Present Salary Details</h2>
+                </div>
+                <div class="input-group"
+                    style="padding: 1rem; display: flex; flex-direction: column; gap: 0.5rem; flex: 1;">
+                    <div class="result-row">
+                        <span id="label-bp-current" class="label">Revised BP</span>
+                        <span id="res-bp-current" class="value highlight">0</span>
+                    </div>
+
+                    <!-- Input Rows -->
+                    <div class="input-field row-input" style="margin-top: 0.5rem;">
+                        <label>DA</label>
+                        <div class="input-with-val" style="margin: 0;">
+                            <input type="number" id="bal-da-perc" value="4" step="0.1" style="text-align: center;">
+                            <span class="unit">%</span>
+                        </div>
+                        <span id="res-bal-da" class="calc-val">0</span>
+                    </div>
+                    <div class="input-field row-input">
+                        <label>HRA</label>
+                        <div class="input-wrapper" style="width: 100%;">
+                            <div class="input-with-val" style="margin: 0;">
+                                <input type="number" id="hra-perc" value="4" step="1"
+                                    style="text-align: center; height: 36px; font-size: 1rem; border-color: var(--primary); background: rgba(0,0,0,0.2); color: white; cursor: text;">
+                                <span class="unit">%</span>
+                            </div>
+                            <ul id="hra-dropdown" class="custom-dropdown"></ul>
+                        </div>
+                        <span id="res-hra-new" class="calc-val">0</span>
+                    </div>
+                    <div class="input-field row-input">
+                        <label>Others</label>
+                        <div class="input-with-val" style="margin: 0;">
+                            <input type="number" id="others-val" value="0" step="1" style="text-align: center;">
+                            <span class="unit">Rs</span>
+                        </div>
+                        <span id="res-others" class="calc-val">0</span>
+                    </div>
+                </div>
+                <!-- Box-style footer -->
+                <div class="section-footer"
+                    style="padding: 1.25rem; background: rgba(59, 130, 246, 0.08); border-top: 1px solid rgba(59, 130, 246, 0.2); text-align: center; border-radius: 0 0 1rem 1rem;">
+                    <span id="label-gross-new"
+                        style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; display: block; margin-bottom: 2px;">Gross
+                        Salary</span>
+                    <span id="res-gross-new" class="total-val"
+                        style="font-size: 1.8rem; font-weight: 800; color: var(--primary);">0</span>
+                    <span id="gross-new-val" style="display: none;">0</span>
+                </div>
+            </section>
+        </main>
+
+
+
+
+        <!-- Detailed Progression Results (Timeline) -->
+
+
+        <p class="disclaimer"
+            style="margin: 1rem 0 0.5rem 0; padding: 0 1rem; line-height: 1.4; font-size: 0.95rem; color: #ef4444; text-align: center; font-weight: 500; letter-spacing: 0.5px;">
+            * NOTE: Calculations are approximate and for informational purposes only.
+        </p>
+
+        <!-- Section: Report Settings -->
+        <section class="revision-section report-card" id="report-settings-section" style="margin-top: 1rem;">
+            <div class="section-header reports-header">
+                <h2 style="color: #ffffff;">Report Settings</h2>
+            </div>
+            <div class="input-group">
+                <div class="input-field report-field">
+                    <label style="color: #ffffff;">Employee Name</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="reportName" placeholder="Optional">
+                    </div>
+                </div>
+                <div class="input-field report-field">
+                    <label style="color: #ffffff;">PEN Number</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="penNumber" placeholder="Optional">
+                    </div>
+                </div>
+                <div class="input-field report-field full-width">
+                    <label>School / Office Name</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="schoolName" placeholder="Optional">
+                    </div>
+                </div>
+            </div>
+
+            <div class="button-group report-buttons">
+                <button id="downloadBtn" class="download-button">
+                    <span>📥</span> Download PDF
+                </button>
+                <button id="shareBtn" class="share-button">
+                    <span>📤</span> Share Report
+                </button>
+            </div>
+        </section>
+
+
+        <footer>email: sreee.sreejith@gmail.com
+
+        </footer>
+    </div>
+
+    <script src="script.js?v=2.2"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').catch(err => console.log('SW fail', err));
+            });
+        }
+    </script>
+</body>
+
+</html>

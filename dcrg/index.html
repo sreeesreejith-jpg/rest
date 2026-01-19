@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apps | Pension & DCRG</title>
+    <meta name="description"
+        content="Calculate Kerala Government Pension and DCRG with this easy-to-use, mobile-friendly calculator. Features instant results and accurate government formulas.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=2.0">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <!-- Mobile App Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Pension Calc">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./service-worker.js')
+                    .then(reg => console.log('SW Registered'))
+                    .catch(err => console.log('SW Error', err));
+            });
+        }
+    </script>
+    <script src="../capacitor.js"></script>
+    <script src="../capacitor-handler.js"></script>
+    <!-- PDF Generation Library -->
+    <script src="../jspdf.umd.min.js"></script>
+    <script src="../jspdf.plugin.autotable.min.js"></script>
+    <script src="../pdf-helper.js"></script>
+</head>
+
+<body>
+    <div class="container main-content-padding">
+        <!-- Home Link -->
+        <a href="../index.html" class="home-button">🏠</a>
+
+        <!-- Report Header (Print only) -->
+        <div class="report-header">
+            <h1>Pension & DCRG Report</h1>
+            <p id="printEmployeeName"></p>
+            <p>Generated on: <span id="printDate"></span></p>
+        </div>
+
+        <!-- Placeholder Message -->
+        <p class="placeholder-message">Fill the fields with your own data.</p>
+
+        <main>
+            <!-- Section 1 (was 2): inputs -->
+            <section class="card service-card" id="input-section">
+                <h2>Service Details</h2>
+                <div class="input-grid">
+                    <div class="input-group">
+                        <label for="basicPay">Basic Pay (BP)</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="basicPay" placeholder="Enter Basic Pay" autocomplete="off">
+                            <ul id="custom-dropdown" class="custom-dropdown">
+                                <!-- Items populated by JS -->
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label for="daPercentage">DA Percentage (DA%)</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="daPercentage" min="0" step="1">
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label for="retirementAge">Age at Retirement/VRS</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="retirementAge">
+                        </div>
+                    </div>
+                    <div class="input-group full-width">
+                        <label for="serviceYears">Completed Years of Service</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="serviceYears" min="10" max="35">
+                        </div>
+                    </div>
+                    <div class="input-group full-width">
+                        <label for="avgEmoluments">Avg 10 Months Basic Pay</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="avgEmoluments">
+                            <small class="input-hint">10 month average basic pay is used for calculation; if unknown,
+                                Current Basic Pay is used.</small>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 2 (was 3): Calculation Details -->
+            <section class="card calc-card hidden" id="details-section">
+                <h2>Calculation Details</h2>
+                <div class="details-list">
+                    <!-- Basis Group -->
+                    <div class="detail-group-header">Computation Basis</div>
+                    <div class="detail-item">
+                        <span class="detail-label">Last Basic pay + DA</span>
+                        <span class="detail-value" id="calcLastPay">0</span>
+                        <small class="detail-desc">Used for DCRG</small>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Avg 10 Months Basic Pay</span>
+                        <span class="detail-value" id="calcAvgEmoluments">0</span>
+                        <small class="detail-desc">Used for Pension</small>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Qualifying Service</span>
+                        <span class="detail-value" id="calcQS">0</span>
+                        <small class="detail-desc">Pension (Max 30) | DCRG (Max 33)</small>
+                    </div>
+
+                    <!-- Monthly Group -->
+                    <div class="detail-group-header">Monthly Benefits</div>
+                    <div class="detail-item">
+                        <span class="detail-label">Full Basic Pension</span>
+                        <span class="detail-value" id="calcBasicPension">0</span>
+                        <div class="detail-step" id="stepPension"></div>
+                        <small class="detail-desc">(Avg Pay / 2) × Factor</small>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Reduced Pension (60%)</span>
+                        <span class="detail-value text-success" id="calcReducedPension">0</span>
+                        <div class="detail-step" id="stepReduced"></div>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Commutable Pension (40%)</span>
+                        <span class="detail-value" id="calcCommutablePension">0</span>
+                        <small class="detail-desc">Portion for Lump Sum Calculation</small>
+                    </div>
+
+                    <!-- Lump Sum Group -->
+                    <div class="detail-group-header">Lump Sum Benefits</div>
+                    <div class="detail-item">
+                        <span class="detail-label">Pension Commutation</span>
+                        <span class="detail-value" id="calcCommutation">0</span>
+                        <div class="detail-step" id="stepCommutation"></div>
+                        <small class="detail-desc">Commutable Portion × Factor (<span id="dispCommFactor"
+                                class="highlight-factor">Factor</span>) × 12</small>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">DCRG Amount</span>
+                        <span class="detail-value text-accent" id="calcDcrg">0</span>
+                        <div class="detail-step" id="stepDcrg"></div>
+                        <small class="detail-desc">Last Pay × (QS / 2) [Max ₹17L]</small>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Section 3 (was 1): Summary -->
+        <div class="sticky-dashboard summary-card hidden" id="benefits-section">
+            <div class="main-benefit">
+                <span class="label">Summary</span>
+                <span class="value blinking" id="totalBenefitsHeader">0</span>
+                <small class="sub-label">(Commutation + DCRG)</small>
+
+                <div class="secondary-highlight">
+                    <span class="value" id="balanceHeader">0</span>
+                    <span class="label">Balance Pension Next Month Onwards</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 4: Report Settings -->
+        <div class="card report-card hidden" id="report-settings-section">
+            <h2>Report Settings</h2>
+            <div class="input-grid">
+                <div class="input-group">
+                    <label for="reportName">Employee Name</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="reportName" placeholder="Optional">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label for="penNumber">PEN Number</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="penNumber" placeholder="Optional">
+                    </div>
+                </div>
+                <div class="input-group full-width">
+                    <label for="schoolName">School / Office Name</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="schoolName" placeholder="Optional">
+                    </div>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button id="downloadBtn" class="download-button">
+                    <span>📥</span> Download PDF
+                </button>
+                <button id="shareBtn" class="share-button">
+                    <span>📤</span> Share Report
+                </button>
+            </div>
+        </div>
+
+        <p class="disclaimer">* Calculations are approximate</p>
+        <footer class="developer-credit">email: sreee.sreejith@gmail.com</footer>
+
+    </div>
+    <script src="script.js?v=2.0"></script>
+</body>
+
+</html>

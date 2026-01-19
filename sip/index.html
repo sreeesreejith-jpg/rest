@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIP Calculator</title>
+    <meta name="description" content="Calculate returns on your Systematic Investment Plan (SIP) instantly.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=2.0">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="icon-192.png">
+    <meta name="theme-color" content="#10b981">
+    <script src="../capacitor.js"></script>
+    <script src="../capacitor-handler.js"></script>
+    <script src="../jspdf.umd.min.js"></script>
+    <script src="../jspdf.plugin.autotable.min.js"></script>
+    <script src="../pdf-helper.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <a href="../index.html" class="home-icon" title="Go Home">🏠</a>
+                <div class="header-text">
+                    <h1>SIP Calculator</h1>
+                    <p>Forecast your wealth creation journey.</p>
+                </div>
+            </div>
+        </header>
+        <p class="placeholder-message"
+            style="text-align:center; margin:1rem 0; font-weight:500; color:var(--text-muted);">Fill the fields with
+            your own data.</p>
+
+        <main>
+            <div class="calculator-grid">
+                <div class="input-group">
+                    <label for="investment">Monthly Investment</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="investment" step="500">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="rate">Expected Return Rate (p.a)</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="rate" step="0.1">
+                        <span class="unit-symbol">%</span>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="years">Time Period</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="years" step="1">
+                        <span class="unit-symbol">Years</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="result-card" id="result-card">
+                <div class="total-section">
+                    <span>Maturity Value</span>
+                    <div class="result-value" id="total-value">0</div>
+                </div>
+                <div class="result-breakdown">
+                    <div class="breakdown-item">
+                        <span>Invested Amount</span>
+                        <strong id="invested-amount">0</strong>
+                    </div>
+                    <div class="breakdown-item">
+                        <span>Est. Returns</span>
+                        <strong id="est-returns" style="color: #10b981;">0</strong>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <div class="button-group" style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+            <button id="downloadBtn" class="download-button"
+                style="flex: 1; padding: 0.8rem; border-radius: 10px; background: #4f46e5; color: white; border: none; font-weight: bold; cursor: pointer;">
+                <span>📥</span> Download PDF
+            </button>
+            <button id="shareBtn" class="share-button"
+                style="flex: 1; padding: 0.8rem; border-radius: 10px; background: #10b981; color: white; border: none; font-weight: bold; cursor: pointer;">
+                <span>📤</span> Share Report
+            </button>
+        </div>
+
+
+        <p class="disclaimer">* Calculations are approximate</p>
+        <footer>email: sreee.sreejith@gmail.com
+
+        </footer>
+    </div>
+
+    <script src="script.js?v=2.0"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').catch(err => console.log('SW fail', err));
+            });
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,1 @@
+// Capacitor native bridge placeholder

@@ -1,0 +1,218 @@
+:root {
+    --bg-color: #0f172a;
+    --calc-bg: #1e293b;
+    --btn-bg: #334155;
+    --btn-text: #f8fafc;
+    --accent-color: #38bdf8;
+    --accent-glow: rgba(56, 189, 248, 0.1);
+    --op-color: #8b5cf6;
+    --op-glow: rgba(139, 92, 246, 0.1);
+    --equal-bg: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%);
+    --font-main: 'Outfit', sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    background-color: var(--bg-color);
+    font-family: var(--font-main);
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    color: #f8fafc;
+}
+
+.app-container {
+    width: 100%;
+    height: 100%;
+    max-width: 480px;
+    background: var(--calc-bg);
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+}
+
+.calculator-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 20px;
+}
+
+/* Header Branding */
+.app-header {
+    text-align: center;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--accent-color);
+    margin-bottom: 20px;
+    opacity: 0.7;
+    text-shadow: 0 0 10px var(--accent-glow);
+}
+
+/* Display Area */
+.display-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: flex-end;
+    padding: 20px;
+    margin-bottom: 20px;
+    word-break: break-all;
+}
+
+/* Cursor and Expression Styling */
+.history {
+    font-size: 1.2rem;
+    color: #94a3b8;
+    margin-bottom: 15px;
+    min-height: 1.6rem;
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    flex-wrap: wrap;
+    position: relative;
+    cursor: text;
+    font-family: 'Outfit', monospace;
+    letter-spacing: 1px;
+}
+
+.history span {
+    padding: 0 1px;
+    transition: color 0.2s;
+}
+
+.history span:hover {
+    color: var(--accent-color);
+}
+
+.cursor {
+    display: inline-block;
+    width: 2px;
+    height: 1.4rem;
+    background-color: var(--accent-color);
+    animation: blink 1s step-end infinite;
+    margin-left: 2px;
+    box-shadow: 0 0 8px var(--accent-glow);
+}
+
+@keyframes blink {
+
+    from,
+    to {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
+}
+
+.current-input {
+    font-size: 3.5rem;
+    font-weight: 600;
+    color: #ffffff;
+    text-shadow: 0 0 15px rgba(255, 255, 255, 0.15);
+    transition: all 0.3s ease;
+}
+
+/* Keypad Grid Update */
+.keypad {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(5, 70px) 60px;
+    /* 5 rows + wide equals */
+    gap: 12px;
+    padding-bottom: 10px;
+}
+
+.btn {
+    border: none;
+    outline: none;
+    background: var(--btn-bg);
+    color: var(--btn-text);
+    font-family: var(--font-main);
+    font-size: 1.4rem;
+    font-weight: 500;
+    border-radius: 20px;
+    cursor: pointer;
+    height: 100%;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.3),
+        -2px -2px 5px rgba(255, 255, 255, 0.03);
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn:active {
+    transform: scale(0.92);
+    box-shadow: inset 4px 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+.btn.func {
+    color: var(--accent-color);
+    font-weight: 600;
+}
+
+.btn.op {
+    background: var(--op-color);
+    color: white;
+    box-shadow: 0 4px 15px var(--op-glow);
+}
+
+.btn.op:active {
+    background: #6324a0;
+}
+
+.btn.equal {
+    grid-column: span 4;
+    background: var(--equal-bg);
+    color: white;
+    font-weight: 700;
+    font-size: 1.8rem;
+    box-shadow: 0 0 25px var(--accent-glow);
+    border-radius: 24px;
+}
+
+/* Scrollbar for long expressions */
+.display-container::-webkit-scrollbar {
+    display: none;
+}
+
+@media (max-height: 750px) {
+    .keypad {
+        grid-template-rows: repeat(5, 60px) 50px;
+        gap: 8px;
+    }
+
+    .current-input {
+        font-size: 2.8rem;
+    }
+
+    .btn {
+        font-size: 1.2rem;
+        border-radius: 16px;
+    }
+}
+
+.footer-email {
+    text-align: center;
+    padding: 10px 0;
+    font-size: 0.8rem;
+    color: #94a3b8;
+    letter-spacing: 0.5px;
+    margin-top: auto;
+}

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apps | Dynamic EMI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=2.0">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="icon-192.png">
+    <script src="../capacitor.js"></script>
+    <script src="../capacitor-handler.js"></script>
+    <script src="../jspdf.umd.min.js"></script>
+    <script src="../jspdf.plugin.autotable.min.js"></script>
+    <script src="../pdf-helper.js"></script>
+</head>
+
+<body>
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(() => console.log('Service Worker Registered'))
+                .catch((error) => console.log('Service Worker Registration Failed:', error));
+        }
+    </script>
+    <div class="background-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <div class="container">
+        <header>
+            <div class="header-content" style="display: flex; align-items: flex-start; gap: 1rem;">
+                <a href="../index.html" class="home-icon"
+                    style="text-decoration: none; font-size: 1.5rem; line-height: 1;">🏠</a>
+                <div class="header-text-group" style="flex: 1;">
+                    <div class="header-text">
+                        <h1>Dynamic EMI Calculator</h1>
+                        <p>Fill any 3 fields to calculate the 4th instantly.</p>
+                    </div>
+                </div>
+            </div>
+        </header>
+        <p class="placeholder-message"
+            style="text-align:center; margin:1rem 0; font-weight:500; color:var(--text-muted);">Fill the fields with
+            your own data.</p>
+
+        <div class="calculator-grid">
+            <div class="input-group">
+                <label for="principal">Principal Amount</label>
+                <div class="input-wrapper">
+                    <input type="number" id="principal" step="any">
+                </div>
+                <div class="indicator" id="ind-principal"></div>
+            </div>
+
+            <div class="input-group">
+                <label for="rate">Interest Rate</label>
+                <div class="input-wrapper">
+                    <input type="number" id="rate" step="0.01">
+                    <span class="unit-symbol">%</span>
+                </div>
+                <div class="indicator" id="ind-rate"></div>
+            </div>
+
+            <div class="input-group">
+                <label for="tenure">Tenure</label>
+                <div class="input-wrapper">
+                    <input type="number" id="tenure" step="0.1">
+                    <span class="unit-symbol">Years</span>
+                </div>
+                <div class="indicator" id="ind-tenure"></div>
+            </div>
+
+            <div class="input-group">
+                <label for="emi">EMI</label>
+                <div class="input-wrapper">
+                    <input type="number" id="emi" step="any">
+                </div>
+                <div class="indicator" id="ind-emi"></div>
+            </div>
+        </div>
+
+        <div class="summary-container" id="summary-card">
+            <div class="summary-visual">
+                <div class="donut-chart" id="donut-chart">
+                    <div class="donut-segment interest"></div>
+                    <div class="donut-center">
+                        <span id="interest-percent">0%</span>
+                        <small>Interest</small>
+                    </div>
+                </div>
+            </div>
+            <div class="summary-details">
+                <div class="detail-item">
+                    <span>Total Interest</span>
+                    <strong id="total-interest">0</strong>
+                </div>
+                <div class="detail-item">
+                    <span>Total Payment</span>
+                    <strong id="total-payment">0</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="status-message" id="status-message">
+            Enter 3 values to compute the missing one.
+        </div>
+        <div class="actions">
+            <a href="amortization.html" class="btn-secondary" id="btn-amortization">Amortization Details</a>
+        </div>
+
+        <div class="button-group" style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+            <button id="downloadBtn" class="download-button"
+                style="flex: 1; padding: 0.8rem; border-radius: 10px; background: #4f46e5; color: white; border: none; font-weight: bold; cursor: pointer;">
+                <span>📥</span> Download PDF
+            </button>
+            <button id="shareBtn" class="share-button"
+                style="flex: 1; padding: 0.8rem; border-radius: 10px; background: #10b981; color: white; border: none; font-weight: bold; cursor: pointer;">
+                <span>📤</span> Share Report
+            </button>
+        </div>
+
+        <p class="disclaimer">* Calculations are approximate</p>
+        <footer class="footer">email: sreee.sreejith@gmail.com
+
+        </footer>
+    </div>
+
+    <script src="script.js?v=2.0"></script>
+</body>
+
+</html>

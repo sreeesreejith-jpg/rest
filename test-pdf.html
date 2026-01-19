@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Helper Test</title>
+    <script src="./js/jspdf.umd.min.js"></script>
+    <script src="./js/jspdf.plugin.autotable.min.js"></script>
+    <script src="./js/pdf-helper.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+
+        button {
+            padding: 15px 30px;
+            margin: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+            color: white;
+        }
+
+        .download {
+            background: #4f46e5;
+        }
+
+        .share {
+            background: #10b981;
+        }
+
+        #log {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f3f4f6;
+            border-radius: 8px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>PDF Helper Test Page</h1>
+    <p>This page tests the PDF generation and sharing functionality.</p>
+
+    <button class="download" onclick="testDownload()">Test Download PDF</button>
+    <button class="share" onclick="testShare()">Test Share PDF</button>
+
+    <div id="log"></div>
+
+    <script>
+        // Capture console logs
+        const logDiv = document.getElementById('log');
+        const originalLog = console.log;
+        const originalError = console.error;
+
+        function addLog(type, ...args) {
+            const msg = args.map(a => typeof a === 'object' ? JSON.stringify(a, null, 2) : a).join(' ');
+            const p = document.createElement('div');
+            p.style.color = type === 'error' ? 'red' : 'black';
+            p.textContent = `[${type}] ${msg}`;
+            logDiv.appendChild(p);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        console.log = function (...args) {
+            originalLog.apply(console, args);
+            addLog('log', ...args);
+        };
+
+        console.error = function (...args) {
+            originalError.apply(console, args);
+            addLog('error', ...args);
+        };
+
+        // Test PDF generation
+        function generateTestPDF() {
+            console.log('Generating test PDF...');
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            doc.setFontSize(20);
+            doc.text('Test PDF Document', 20, 20);
+            doc.setFontSize(12);
+            doc.text('This is a test PDF generated at: ' + new Date().toLocaleString(), 20, 40);
+
+            doc.autoTable({
+                startY: 60,
+                head: [['Item', 'Value']],
+                body: [
+                    ['Test 1', '100'],
+                    ['Test 2', '200'],
+                    ['Total', '300']
+                ]
+            });
+
+            const blob = doc.output('blob');
+            console.log('PDF blob generated:', blob.size, 'bytes');
+            return { blob, title: 'Test_PDF_' + Date.now() };
+        }
+
+        async function testDownload() {
+            console.log('=== Testing Download ===');
+            try {
+                console.log('Checking if PDFHelper exists:', typeof window.PDFHelper);
+                console.log('Checking if jsPDF exists:', typeof window.jspdf);
+
+                const result = generateTestPDF();
+                console.log('Calling PDFHelper.download...');
+                window.PDFHelper.download(result.blob, result.title + '.pdf');
+                console.log('Download completed successfully!');
+            } catch (err) {
+                console.error('Download failed:', err);
+                alert('Download failed: ' + err.message);
+            }
+        }
+
+        async function testShare() {
+            console.log('=== Testing Share ===');
+            try {
+                console.log('Checking if PDFHelper exists:', typeof window.PDFHelper);
+                console.log('Checking Capacitor:', window.Capacitor ? 'Present' : 'Not present');
+                console.log('Checking navigator.share:', typeof navigator.share);
+                console.log('Checking navigator.canShare:', typeof navigator.canShare);
+
+                const result = generateTestPDF();
+                console.log('Calling PDFHelper.share...');
+                const shareResult = await window.PDFHelper.share(result.blob, result.title + '.pdf', 'Test PDF');
+                console.log('Share completed:', shareResult);
+            } catch (err) {
+                console.error('Share failed:', err);
+                if (err.name !== 'AbortError') {
+                    alert('Share failed: ' + err.message);
+                }
+            }
+        }
+
+        // Log initial state
+        console.log('=== Initial State ===');
+        console.log('PDFHelper loaded:', typeof window.PDFHelper);
+        console.log('jsPDF loaded:', typeof window.jspdf);
+        console.log('Capacitor loaded:', typeof window.Capacitor);
+        console.log('Is native:', window.Capacitor && window.Capacitor.isNative);
+    </script>
+</body>
+
+</html>
