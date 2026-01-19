@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin View | Pay Revision Calculations</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="../jspdf.umd.min.js"></script>
+    <script src="../jspdf.plugin.autotable.min.js"></script>
+    <script src="../pdf-helper.js"></script>
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --text: #f8fafc;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 15px;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            margin: 0;
+        }
+
+        .btn-back {
+            text-decoration: none;
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: 0.3s;
+        }
+
+        .btn-back:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .stat-card h3 {
+            margin: 0;
+            font-size: 0.8rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+        }
+
+        .stat-card p {
+            margin: 10px 0 0;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        th,
+        td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        th {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+        }
+
+        tr:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .badge-download {
+            background: rgba(34, 197, 94, 0.2);
+            color: #4ade80;
+        }
+
+        .badge-share {
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+        }
+
+        .btn-delete {
+            background: rgba(239, 68, 68, 0.1);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            padding: 5px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: 0.2s;
+        }
+
+        .btn-delete:hover {
+            background: rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+        }
+
+        .btn-download {
+            background: rgba(59, 130, 246, 0.1);
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            padding: 5px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-download:hover {
+            background: rgba(59, 130, 246, 0.3);
+            color: #3b82f6;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            font-size: 1.2rem;
+            color: #94a3b8;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 50px;
+            color: #94a3b8;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Nithara Calculation Entries</h1>
+            <a href="index.html" class="btn-back">← Back to Calculator</a>
+        </header>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Total Calculations</h3>
+                <p id="totalCount">0</p>
+            </div>
+            <div class="stat-card">
+                <h3>Unique Users</h3>
+                <p id="uniqueUsers">0</p>
+            </div>
+        </div>
+
+        <div id="loading" class="loading">Fetching data from Cloud...</div>
+
+        <div id="tableContainer" style="display: none; overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Employee</th>
+                        <th>Old BP</th>
+                        <th>Fitment</th>
+                        <th>Yrs</th>
+                        <th>Rev. BP</th>
+                        <th>Gross</th>
+                        <th>PEN</th>
+                        <th>School</th>
+                        <th>Mode</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="entriesBody"></tbody>
+            </table>
+        </div>
+
+        <div id="emptyState" class="empty-state" style="display: none;">
+            No calculations found in the database.
+        </div>
+    </div>
+
+    <script>
+        const payStagesList = [
+            23000, 23700, 24400, 25100, 25800, 26500, 27200, 27900, 28700, 29500,
+            30300, 31100, 32000, 32900, 33800, 34700, 35600, 36500, 37400, 38300,
+            39300, 40300, 41300, 42300, 43400, 44500, 45600, 46700, 47800, 49000,
+            50200, 51400, 52600, 53900, 55200, 56500, 57900, 59300, 60700, 62200,
+            63700, 65200, 66800, 68400, 70000, 71800, 73600, 75400, 77200, 79000,
+            81000, 83000, 85000, 87000, 89000, 91200, 93400, 95600, 97800, 100300,
+            102800, 105300, 107800, 110300, 112800, 115300, 118100, 120900, 123700,
+            126500, 129300, 132100, 134900, 137700, 140500, 143600, 146700, 149800,
+            153200, 156600, 160000, 163400, 166800
+        ];
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyB3D98SMCiI2eAKuz6T-yWOfU-7_PuN75U",
+            authDomain: "nithara-e398a.firebaseapp.com",
+            databaseURL: "https://nithara-e398a-default-rtdb.firebaseio.com",
+            projectId: "nithara-e398a",
+            storageBucket: "nithara-e398a.firebasestorage.app",
+            messagingSenderId: "338187479543",
+            appId: "1:338187479543:web:9554ac40e43c26b1cb70d2"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        let globalData = {};
+
+        function formatDate(isoString) {
+            const date = new Date(isoString);
+            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        database.ref('calculations').on('value', (snapshot) => {
+            const data = snapshot.val();
+            globalData = data || {};
+            const loading = document.getElementById('loading');
+            const tableContainer = document.getElementById('tableContainer');
+            const emptyState = document.getElementById('emptyState');
+            const body = document.getElementById('entriesBody');
+
+            loading.style.display = 'none';
+            body.innerHTML = '';
+
+            if (!data) {
+                tableContainer.style.display = 'none';
+                emptyState.style.display = 'block';
+                document.getElementById('totalCount').textContent = '0';
+                document.getElementById('uniqueUsers').textContent = '0';
+                return;
+            }
+
+            tableContainer.style.display = 'block';
+            emptyState.style.display = 'none';
+
+            const keys = Object.keys(data);
+            document.getElementById('totalCount').textContent = keys.length;
+            const names = new Set();
+
+            keys.reverse().forEach(id => {
+                const entry = data[id];
+                names.add(entry.employeeName);
+
+                const row = document.createElement('tr');
+                const badgeClass = entry.action === 'Download' ? 'badge-download' : 'badge-share';
+
+                row.innerHTML = `
+                    <td style="font-size: 0.75rem; color: #94a3b8;">${formatDate(entry.timestamp)}</td>
+                    <td><strong style="color: #fff;">${entry.employeeName || "Anon"}</strong></td>
+                    <td>${entry.oldBP}</td>
+                    <td>${entry.fitment}%</td>
+                    <td>${entry.serviceYears}</td>
+                    <td>${entry.revisedBP}</td>
+                    <td style="color: var(--primary); font-weight: 700;">${entry.grossSalary}</td>
+                    <td style="font-size: 0.75rem;">${entry.pen || "-"}</td>
+                    <td style="font-size: 0.75rem;">${entry.school || "-"}</td>
+                    <td><button class="btn-download" onclick="generateDetailedPDF('${id}')"><span>📥</span> PDF</button></td>
+                    <td><button class="btn-delete" onclick="deleteEntry('${id}')">Delete</button></td>
+                `;
+                body.appendChild(row);
+            });
+
+            document.getElementById('uniqueUsers').textContent = names.size;
+        });
+
+        function deleteEntry(id) {
+            if (confirm("Are you sure you want to delete this calculation record?")) {
+                database.ref('calculations/' + id).remove()
+                    .then(() => {
+                        // Table updates automatically
+                    })
+                    .catch(err => {
+                        alert("Error deleting: " + err.message);
+                    });
+            }
+        }
+
+        // --- PDF GENERATION LOGIC FOR ADMIN (MATCHING NITHARA STYLE) ---
+        async function generateDetailedPDF(id) {
+            const entry = globalData[id];
+            if (!entry) return;
+
+            try {
+                const jsPDFLib = window.jsPDF || (window.jspdf ? window.jspdf.jsPDF : null);
+                const doc = new jsPDFLib();
+                const reportTitle = "PayRevision_Report_" + new Date(entry.timestamp).getTime();
+                const localMonths = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+                // 1. Header & Title (Blue Header)
+                doc.setFillColor(59, 130, 246);
+                doc.rect(0, 0, 210, 40, 'F');
+                doc.setFontSize(22);
+                doc.setTextColor(255);
+                doc.setFont("helvetica", "bold");
+                doc.text("Pay Revision Report", 14, 20);
+
+                doc.setFontSize(10);
+                doc.setFont("helvetica", "normal");
+                let headerY = 28;
+                if (entry.employeeName) { doc.text(`Employee: ${entry.employeeName}`, 14, headerY); headerY += 5; }
+                if (entry.pen) { doc.text(`PEN Number: ${entry.pen}`, 14, headerY); headerY += 5; }
+                if (entry.school) { doc.text(`School/Office: ${entry.school}`, 14, headerY); headerY += 5; }
+
+                // 2. Main Summary Table (Matching Nithara)
+                const timestamp = new Date(entry.timestamp);
+                const curMonthLabel = localMonths[timestamp.getMonth()] || "Month";
+                const currentMonthYear = curMonthLabel + " " + timestamp.getFullYear();
+
+                doc.setFontSize(14);
+                doc.setTextColor(40);
+                doc.text("Pay Summary Breakdown", 14, 50);
+
+                doc.autoTable({
+                    startY: 55,
+                    head: [['Stage', 'Effective Date', 'Basic Pay', 'Gross Salary']],
+                    body: [
+                        ['PreRevised BP', '01/07/2024', 'Rs. ' + entry.oldBP, '-'],
+                        ['Revised Basic Pay', '01/07/2024', 'Rs. ' + entry.revisedBP, '-'],
+                        ['Present Basic Pay', currentMonthYear, 'Rs. ' + entry.presentBP, 'Rs. ' + entry.grossSalary]
+                    ],
+                    theme: 'striped',
+                    headStyles: { fillColor: [59, 130, 246], halign: 'left' },
+                    columnStyles: {
+                        0: { halign: 'left' },
+                        1: { halign: 'left' },
+                        2: { halign: 'right' },
+                        3: { halign: 'right' }
+                    }
+                });
+
+                // 3. Detailed Pay Fixation (01/07/2024)
+                let currentY = doc.lastAutoTable.finalY + 15;
+                doc.text("Pay Fixation Details (01/07/2024)", 14, currentY);
+
+                const oldBP = parseFloat(entry.oldBP) || 0;
+                const daMergedV = Math.round(oldBP * 0.31);
+                const fitmentP = entry.fitment || "0";
+                const fitmentV = Math.round(oldBP * (parseFloat(fitmentP) / 100));
+                const yearsS = entry.serviceYears || "0";
+                let weightageV = 0;
+                let weightageP = 0;
+
+                if (entry.isWeightage) {
+                    weightageP = Math.min(parseInt(yearsS) * 0.5, 15);
+                    weightageV = Math.round(oldBP * (weightageP / 100));
+                }
+                const actualTotal = oldBP + daMergedV + fitmentV + weightageV;
+
+                const fixationRows = [
+                    ['PreRevised BP', '-', 'Rs. ' + oldBP],
+                    ['DA Merged', '31 %', 'Rs. ' + daMergedV],
+                    ['Fitment Benefit', fitmentP + ' %', 'Rs. ' + fitmentV]
+                ];
+
+                if (entry.isWeightage) {
+                    fixationRows.push(['Service Weightage', yearsS + ' Yrs', 'Rs. ' + weightageV]);
+                }
+
+                fixationRows.push(
+                    ['Actual Total', 'Sum', 'Rs. ' + actualTotal],
+                    ['Fixed Basic Pay', 'Round Next 100', 'Rs. ' + entry.revisedBP]
+                );
+
+                doc.autoTable({
+                    startY: currentY + 5,
+                    head: [['Fixation Component', 'Info', 'Amount']],
+                    body: fixationRows,
+                    theme: 'grid',
+                    headStyles: { fillColor: [75, 85, 99] },
+                    columnStyles: { 2: { halign: 'right' } }
+                });
+
+                // 4. Timeline (Progression)
+                const timelineRows = calculateTimelineRows(entry);
+                if (timelineRows.length > 0) {
+                    let timelineY = doc.lastAutoTable.finalY + 15;
+                    const estHeight = (timelineRows.length * 8) + 20;
+                    if (timelineY + estHeight > 285) {
+                        doc.addPage();
+                        timelineY = 20;
+                    }
+                    doc.setFontSize(14);
+                    doc.setTextColor(59, 130, 246);
+                    doc.text("Detailed Pay Progression Timeline", 14, timelineY);
+
+                    doc.autoTable({
+                        startY: timelineY + 5,
+                        head: [['Progression Event', 'Revised Pay Stage']],
+                        body: timelineRows,
+                        theme: 'grid',
+                        headStyles: { fillColor: [59, 130, 246] },
+                        columnStyles: {
+                            0: { cellWidth: 'auto' },
+                            1: { halign: 'right', fontStyle: 'bold', cellWidth: 50 }
+                        }
+                    });
+                }
+
+                // 5. Present Salary Details (Green Header)
+                currentY = doc.lastAutoTable.finalY + 15;
+                if (currentY + 60 > 285) {
+                    doc.addPage();
+                    currentY = 20;
+                }
+                doc.setFontSize(14);
+                doc.setTextColor(40);
+                doc.text(`Present Salary Details (${currentMonthYear})`, 14, currentY);
+
+                const currentBP = parseFloat(entry.presentBP) || 0;
+                const balDaP = entry.balDA || "0";
+                const balDaV = Math.round(currentBP * (parseFloat(balDaP) / 100));
+                const hraP = entry.hra || "0";
+                const hraV = Math.round(currentBP * (parseFloat(hraP) / 100));
+                const othersV = parseFloat(entry.others) || 0;
+
+                doc.autoTable({
+                    startY: currentY + 5,
+                    head: [['Current Component', 'Rate/Info', 'Amount']],
+                    body: [
+                        ['Current Basic Pay', 'From Progression', 'Rs. ' + entry.presentBP],
+                        ['Dearness Allowance (DA)', balDaP + '%', 'Rs. ' + balDaV],
+                        ['House Rent Allowance (HRA)', hraP + '%', 'Rs. ' + hraV],
+                        ['Others', '-', 'Rs. ' + othersV],
+                        ['Total Monthly Gross', currentMonthYear, 'Rs. ' + entry.grossSalary]
+                    ],
+                    theme: 'grid',
+                    headStyles: { fillColor: [16, 185, 129] },
+                    columnStyles: { 2: { halign: 'right' } }
+                });
+
+                // 6. Footer
+                let finalY = doc.lastAutoTable.finalY + 15;
+                if (finalY > 275) { doc.addPage(); finalY = 20; }
+
+                doc.setFontSize(9);
+                doc.setTextColor(100);
+                doc.text("* NOTE: Calculations are approximate and for informational purposes only.", 14, finalY);
+                doc.setFontSize(10);
+                doc.setTextColor(150);
+                doc.text("Email: sreee.sreejith@gmail.com", 14, finalY + 8);
+
+                const blob = doc.output('blob');
+                await window.PDFHelper.download(blob, `${reportTitle}.pdf`);
+
+            } catch (err) {
+                console.error("Admin PDF Match Error:", err);
+                alert("Error: " + err.message);
+            }
+        }
+
+        function getMonthName(index) {
+            const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            return months[index] || "-";
+        }
+
+        function calculateTimelineRows(entry) {
+            const bp = parseFloat(entry.oldBP) || 0;
+            const fitmentPerc = parseFloat(entry.fitment) || 0;
+            const yearsService = parseInt(entry.serviceYears) || 0;
+            const isWeightageEnabled = entry.isWeightage || (yearsService > 0);
+            const incMonth = entry.incMonth !== "" ? parseInt(entry.incMonth) : null;
+            const hasGrade = entry.hasGrade || false;
+            const gradeMonth = parseInt(entry.gradeMonth);
+            const gradeYear = parseInt(entry.gradeYear);
+
+            if (!bp || incMonth === null) return [];
+
+            const startDate = new Date(2024, 6, 1);
+            let today = new Date();
+            const jan2026 = new Date(2026, 0, 1);
+            if (today < jan2026) today = jan2026;
+
+            let events = [];
+            let checkDate = new Date(startDate);
+            while (checkDate <= today) {
+                if (incMonth !== null && checkDate.getMonth() === incMonth && checkDate.getTime() !== startDate.getTime()) {
+                    events.push({ type: 'increment', date: new Date(checkDate), steps: 1 });
+                }
+                const gradeThreshold = new Date(2024, 7, 1);
+                if (hasGrade && checkDate.getMonth() === gradeMonth && checkDate.getFullYear() === gradeYear && checkDate >= gradeThreshold) {
+                    events.push({ type: 'grade', date: new Date(checkDate), steps: 2 });
+                }
+                checkDate.setMonth(checkDate.getMonth() + 1);
+            }
+            events.sort((a, b) => {
+                if (a.date.getTime() !== b.date.getTime()) return a.date - b.date;
+                return a.type === 'increment' ? -1 : 1;
+            });
+
+            const revisedScale = payStagesList.map(stage => {
+                const da = Math.round(stage * 0.31);
+                const fitment = Math.round(stage * (fitmentPerc / 100));
+                let weightage = 0;
+                if (isWeightageEnabled) {
+                    const weightagePerc = Math.min(yearsService * 0.5, 15);
+                    weightage = Math.round(stage * (weightagePerc / 100));
+                }
+                return Math.ceil((stage + da + fitment + weightage) / 100) * 100;
+            });
+
+            const baseIndex = payStagesList.indexOf(bp);
+            if (baseIndex === -1) return [];
+
+            let rows = [["Revised BP On 01/07/2024", `Rs. ${revisedScale[baseIndex]}`]];
+            let currentIndex = baseIndex;
+            const monthsShort = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+            events.forEach(event => {
+                currentIndex += event.steps;
+                currentIndex = Math.min(currentIndex, revisedScale.length - 1);
+                const label = (event.type === 'increment' ? 'Increment' : 'Grade') + ` on ${monthsShort[event.date.getMonth()]} ${event.date.getFullYear()}`;
+                rows.push([label, `Rs. ${revisedScale[currentIndex]}`]);
+            });
+
+            return rows;
+        }
+    </script>
+</body>
+
+</html>
