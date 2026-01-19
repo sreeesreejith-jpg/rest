@@ -1,10 +1,10 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace "com.sreejith.nithara"
+    namespace "com.rest.apps"
     compileSdkVersion rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "com.sreejith.nithara"
+        applicationId "com.rest.apps"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 104
@@ -18,7 +18,7 @@ android {
     }
     signingConfigs {
         release {
-            storeFile file("nithara-release.keystore")
+            storeFile file("rest-release.keystore")
             storePassword System.getenv("KEYSTORE_PASSWORD") ?: findProperty("KEYSTORE_PASSWORD")
             keyAlias System.getenv("KEY_ALIAS") ?: findProperty("KEY_ALIAS")
             keyPassword System.getenv("KEY_PASSWORD") ?: findProperty("KEY_PASSWORD")

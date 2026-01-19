@@ -1,8 +1,8 @@
 {
-    "name": "Nithara Apps",
-    "short_name": "Nithara",
-    "id": "com.sreejith.nithara",
-    "description": "Your centralized suite of professional financial and utility tools.",
+    "name": "Rest Apps Suite",
+    "short_name": "Rest",
+    "id": "com.rest.apps",
+    "description": "A premium collection of finance and utility tools.",
     "start_url": "./index.html",
     "display": "standalone",
     "background_color": "#0f172a",
