@@ -147,6 +147,22 @@ header p {
     font-size: 0.85rem;
 }
 
+.usage-note {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #ef4444 !important;
+    margin-top: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    animation: blinker 1.5s linear infinite;
+}
+
+@keyframes blinker {
+    50% {
+        opacity: 0.3;
+    }
+}
+
 .nav-link {
     font-size: 0.75rem;
     color: var(--text-muted);
