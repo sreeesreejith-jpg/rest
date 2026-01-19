@@ -28,23 +28,17 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Build Web Assets
-        run: npm run build
-
-      - name: Sync Capacitor
-        run: npx cap sync
-
       - name: Optimize App Icons
         run: |
           sudo apt-get update
           sudo apt-get install -y imagemagick
           
-          # PWA Icons
+          # 1. Resize root icons (PWA)
           convert icon.png -resize 192x192 icon-192.png
           convert icon.png -resize 512x512 icon-512.png
           convert icon.png -resize 512x512 icon-maskable.png
 
-          # Android Icons (Standard and Round)
+          # 2. Resize Android native icons
           convert icon.png -resize 48x48 android/app/src/main/res/mipmap-mdpi/ic_launcher.png
           convert icon.png -resize 48x48 android/app/src/main/res/mipmap-mdpi/ic_launcher_round.png
           convert icon.png -resize 72x72 android/app/src/main/res/mipmap-hdpi/ic_launcher.png
@@ -55,13 +49,20 @@ jobs:
           convert icon.png -resize 144x144 android/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.png
           convert icon.png -resize 192x192 android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
           convert icon.png -resize 192x192 android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png
-
-          # Android Adaptive Icons (Foreground)
           convert icon.png -resize 108x108 android/app/src/main/res/mipmap-mdpi/ic_launcher_foreground.png
           convert icon.png -resize 162x162 android/app/src/main/res/mipmap-hdpi/ic_launcher_foreground.png
           convert icon.png -resize 216x216 android/app/src/main/res/mipmap-xhdpi/ic_launcher_foreground.png
           convert icon.png -resize 324x324 android/app/src/main/res/mipmap-xxhdpi/ic_launcher_foreground.png
           convert icon.png -resize 432x432 android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_foreground.png
+
+          # 3. DELETE the original large file so it doesn't get bundled!
+          rm icon.png
+
+      - name: Build Web Assets
+        run: npm run build
+
+      - name: Sync Capacitor
+        run: npx cap sync
 
       - name: Decode Keystore
         run: |
