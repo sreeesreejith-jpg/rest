@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Nithara Apps</string>
-    <string name="title_activity_main">Nithara Apps</string>
-    <string name="package_name">com.sreejith.nithara</string>
-    <string name="custom_url_scheme">com.sreejith.nithara</string>
+    <string name="app_name">Rest Apps</string>
+    <string name="title_activity_main">Rest Apps</string>
+    <string name="package_name">com.rest.apps</string>
+    <string name="custom_url_scheme">com.rest.apps</string>
 </resources>

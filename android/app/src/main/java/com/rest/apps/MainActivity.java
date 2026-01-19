@@ -1,4 +1,4 @@
-package com.sreejith.nithara;
+package com.rest.apps;
 
 import com.getcapacitor.BridgeActivity;
 
