@@ -270,6 +270,27 @@
         .clickable-row:hover .expand-icon {
             transform: scale(1.2);
         }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .expand-details-grid {
+                grid-template-columns: 1fr;
+                padding: 0 10px 10px;
+            }
+
+            .timeline-container {
+                padding: 10px;
+            }
+
+            .timeline-item {
+                min-width: 100%;
+                flex: 1 0 100%;
+            }
+
+            .details-header {
+                margin-left: 10px;
+            }
+        }
     </style>
 </head>
 
