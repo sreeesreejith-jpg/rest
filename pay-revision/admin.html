@@ -183,6 +183,93 @@
             padding: 50px;
             color: #94a3b8;
         }
+
+        /* Expandable Details Styles */
+        .details-row {
+            background-color: rgba(15, 23, 42, 0.5);
+            /* Darker background for details */
+        }
+
+        .clickable-row {
+            cursor: pointer;
+        }
+
+        .timeline-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            padding: 20px;
+        }
+
+        .timeline-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-left: 3px solid var(--primary);
+            padding: 10px 15px;
+            border-radius: 4px;
+            min-width: 200px;
+            flex: 1 0 200px;
+            /* Grow, don't shrink, base 200px */
+        }
+
+        .timeline-label {
+            display: block;
+            font-size: 0.75rem;
+            color: #94a3b8;
+            margin-bottom: 4px;
+        }
+
+        .timeline-value {
+            display: block;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .details-header {
+            font-size: 0.9rem;
+            color: var(--primary);
+            margin: 0 0 10px 20px;
+            padding-top: 15px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .expand-details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 0 20px 20px;
+        }
+
+        .nested-table {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+
+        .nested-table td {
+            padding: 8px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .nested-table td:last-child {
+            text-align: right;
+            font-weight: 600;
+        }
+
+        .expand-icon {
+            display: inline-block;
+            transition: transform 0.3s;
+            margin-right: 5px;
+            color: var(--primary);
+            font-size: 0.7rem;
+        }
+
+        .clickable-row:hover .expand-icon {
+            transform: scale(1.2);
+        }
     </style>
 </head>
 
@@ -294,11 +381,19 @@
                 const entry = data[id];
                 names.add(entry.employeeName);
 
+                // Main Row
                 const row = document.createElement('tr');
+                row.classList.add('clickable-row');
+                row.onclick = (e) => {
+                    // Prevent toggling if clicking a button
+                    if (e.target.closest('button')) return;
+                    toggleDetails(id);
+                };
+
                 const badgeClass = entry.action === 'Download' ? 'badge-download' : 'badge-share';
 
                 row.innerHTML = `
-                    <td style="font-size: 0.75rem; color: #94a3b8;">${formatDate(entry.timestamp)}</td>
+                    <td style="font-size: 0.75rem; color: #94a3b8;"><span class="expand-icon">▶</span> ${formatDate(entry.timestamp)}</td>
                     <td><strong style="color: #fff;">${entry.employeeName || "Anon"}</strong></td>
                     <td>${entry.oldBP}</td>
                     <td>${entry.fitment}%</td>
@@ -307,14 +402,117 @@
                     <td style="color: var(--primary); font-weight: 700;">${entry.grossSalary}</td>
                     <td style="font-size: 0.75rem;">${entry.pen || "-"}</td>
                     <td style="font-size: 0.75rem;">${entry.school || "-"}</td>
-                    <td><button class="btn-download" onclick="generateDetailedPDF('${id}')"><span>📥</span> PDF</button></td>
+                    <td><button class="btn-download" onclick="generateDetailedPDF('${id}')"><span>📤</span> Share</button></td>
                     <td><button class="btn-delete" onclick="deleteEntry('${id}')">Delete</button></td>
                 `;
                 body.appendChild(row);
+
+                // Details Row (Hidden by default)
+                const detailsRow = document.createElement('tr');
+                detailsRow.id = `details-${id}`;
+                detailsRow.style.display = 'none';
+                detailsRow.className = 'details-row';
+
+                // Timeline HTML generation
+                const timelineHTML = renderTimelineHTML(entry);
+
+                detailsRow.innerHTML = `
+                    <td colspan="11">
+                        <div class="expand-details-grid">
+                            <div class="detail-section">
+                                <div class="details-header">Pay Fixation (01/07/2024)</div>
+                                ${renderFixationHTML(entry)}
+                            </div>
+                            <div class="detail-section">
+                                <div class="details-header">Present Salary Details</div>
+                                ${renderSalaryHTML(entry)}
+                            </div>
+                        </div>
+                        <div class="details-header">Detailed Pay Progression Timeline</div>
+                        <div class="timeline-container">
+                            ${timelineHTML}
+                        </div>
+                    </td>
+                `;
+                body.appendChild(detailsRow);
             });
 
             document.getElementById('uniqueUsers').textContent = names.size;
         });
+
+        function toggleDetails(id) {
+            const row = document.getElementById(`details-${id}`);
+            const mainRow = row.previousElementSibling;
+            const icon = mainRow.querySelector('.expand-icon');
+
+            if (row.style.display === 'none') {
+                row.style.display = 'table-row';
+                if (icon) icon.style.transform = 'rotate(90deg)';
+                mainRow.style.background = 'rgba(59, 130, 246, 0.05)';
+            } else {
+                row.style.display = 'none';
+                if (icon) icon.style.transform = 'rotate(0deg)';
+                mainRow.style.background = '';
+            }
+        }
+
+        function renderFixationHTML(entry) {
+            const oldBP = parseFloat(entry.oldBP) || 0;
+            const daMergedV = Math.round(oldBP * 0.31);
+            const fitmentP = entry.fitment || "0";
+            const fitmentV = Math.round(oldBP * (parseFloat(fitmentP) / 100));
+            const yearsS = entry.serviceYears || "0";
+            let weightageV = 0;
+            let weightageP = 0;
+
+            if (entry.isWeightage) {
+                weightageP = Math.min(parseInt(yearsS) * 0.5, 15);
+                weightageV = Math.round(oldBP * (weightageP / 100));
+            }
+            const actualTotal = oldBP + daMergedV + fitmentV + weightageV;
+
+            return `
+                <table class="nested-table">
+                    <tr><td>Pre-Revised BP</td><td>Rs. ${oldBP}</td></tr>
+                    <tr><td>DA Merged (31%)</td><td>Rs. ${daMergedV}</td></tr>
+                    <tr><td>Fitment (${fitmentP}%)</td><td>Rs. ${fitmentV}</td></tr>
+                    ${entry.isWeightage ? `<tr><td>Weightage (${yearsS} Yrs)</td><td>Rs. ${weightageV}</td></tr>` : ''}
+                    <tr style="border-top: 1px solid rgba(255,255,255,0.1); font-weight: bold;"><td>Total</td><td>Rs. ${actualTotal}</td></tr>
+                    <tr style="color: var(--primary); font-weight: bold;"><td>Fixed Basic Pay</td><td>Rs. ${entry.revisedBP}</td></tr>
+                </table>
+            `;
+        }
+
+        function renderSalaryHTML(entry) {
+            const currentBP = parseFloat(entry.presentBP) || 0;
+            const balDaP = entry.balDA || "0";
+            const balDaV = Math.round(currentBP * (parseFloat(balDaP) / 100));
+            const hraP = entry.hra || "0";
+            const hraV = Math.round(currentBP * (parseFloat(hraP) / 100));
+            const othersV = parseFloat(entry.others) || 0;
+
+            return `
+                <table class="nested-table">
+                    <tr><td>Current Basic Pay</td><td>Rs. ${entry.presentBP}</td></tr>
+                    <tr><td>DA (${balDaP}%)</td><td>Rs. ${balDaV}</td></tr>
+                    <tr><td>HRA (${hraP}%)</td><td>Rs. ${hraV}</td></tr>
+                    <tr><td>Others</td><td>Rs. ${othersV}</td></tr>
+                    <tr style="color: #4ade80; font-weight: bold; font-size: 1.1rem;"><td>Monthly Gross</td><td>Rs. ${entry.grossSalary}</td></tr>
+                </table>
+            `;
+        }
+
+        function renderTimelineHTML(entry) {
+            const rows = calculateTimelineRows(entry);
+            if (rows.length === 0) return '<div style="padding: 20px; color: #64748b;">No progression data available.</div>';
+
+            return rows.map(item => `
+                <div class="timeline-item">
+                    <span class="timeline-label">${item[0]}</span>
+                    <span class="timeline-value">${item[1]}</span>
+                </div>
+            `).join('');
+        }
 
         function deleteEntry(id) {
             if (confirm("Are you sure you want to delete this calculation record?")) {
@@ -493,7 +691,8 @@
                 doc.text("Email: sreee.sreejith@gmail.com", 14, finalY + 8);
 
                 const blob = doc.output('blob');
-                await window.PDFHelper.download(blob, `${reportTitle}.pdf`);
+                // Use PDFHelper.share -> It will handle native share or download fallback
+                await window.PDFHelper.share(blob, `${reportTitle}.pdf`, `Pay Revision Report - ${entry.employeeName || 'Employee'}`);
 
             } catch (err) {
                 console.error("Admin PDF Match Error:", err);
