@@ -273,6 +273,10 @@
 
         /* Mobile Responsiveness */
         @media (max-width: 768px) {
+            .hide-mobile {
+                display: none !important;
+            }
+
             .expand-details-grid {
                 grid-template-columns: 1fr;
                 padding: 0 10px 10px;
@@ -289,6 +293,19 @@
 
             .details-header {
                 margin-left: 10px;
+            }
+
+            .mobile-actions {
+                display: flex;
+                gap: 10px;
+                padding: 10px 20px;
+            }
+
+            .mobile-actions button {
+                flex: 1;
+                justify-content: center;
+                padding: 12px;
+                font-size: 0.9rem;
             }
         }
     </style>
@@ -321,14 +338,14 @@
                         <th>Date</th>
                         <th>Employee</th>
                         <th>Old BP</th>
-                        <th>Fitment</th>
-                        <th>Yrs</th>
-                        <th>Rev. BP</th>
-                        <th>Gross</th>
-                        <th>PEN</th>
-                        <th>School</th>
-                        <th>Mode</th>
-                        <th>Action</th>
+                        <th class="hide-mobile">Fitment</th>
+                        <th class="hide-mobile">Yrs</th>
+                        <th class="hide-mobile">Rev. BP</th>
+                        <th class="hide-mobile">Gross</th>
+                        <th class="hide-mobile">PEN</th>
+                        <th class="hide-mobile">School</th>
+                        <th class="hide-mobile">Mode</th>
+                        <th class="hide-mobile">Action</th>
                     </tr>
                 </thead>
                 <tbody id="entriesBody"></tbody>
@@ -417,14 +434,14 @@
                     <td style="font-size: 0.75rem; color: #94a3b8;"><span class="expand-icon">▶</span> ${formatDate(entry.timestamp)}</td>
                     <td><strong style="color: #fff;">${entry.employeeName || "Anon"}</strong></td>
                     <td>${entry.oldBP}</td>
-                    <td>${entry.fitment}%</td>
-                    <td>${entry.serviceYears}</td>
-                    <td>${entry.revisedBP}</td>
-                    <td style="color: var(--primary); font-weight: 700;">${entry.grossSalary}</td>
-                    <td style="font-size: 0.75rem;">${entry.pen || "-"}</td>
-                    <td style="font-size: 0.75rem;">${entry.school || "-"}</td>
-                    <td><button class="btn-download" onclick="generateDetailedPDF('${id}')"><span>📤</span> Share</button></td>
-                    <td><button class="btn-delete" onclick="deleteEntry('${id}')">Delete</button></td>
+                    <td class="hide-mobile">${entry.fitment}%</td>
+                    <td class="hide-mobile">${entry.serviceYears}</td>
+                    <td class="hide-mobile">${entry.revisedBP}</td>
+                    <td class="hide-mobile" style="color: var(--primary); font-weight: 700;">${entry.grossSalary}</td>
+                    <td class="hide-mobile" style="font-size: 0.75rem;">${entry.pen || "-"}</td>
+                    <td class="hide-mobile" style="font-size: 0.75rem;">${entry.school || "-"}</td>
+                    <td class="hide-mobile"><button class="btn-download" onclick="generateDetailedPDF('${id}')"><span>📤</span> Share</button></td>
+                    <td class="hide-mobile"><button class="btn-delete" onclick="deleteEntry('${id}')">Delete</button></td>
                 `;
                 body.appendChild(row);
 
@@ -441,12 +458,29 @@
                     <td colspan="11">
                         <div class="expand-details-grid">
                             <div class="detail-section">
+                                <div class="details-header">Registration Details</div>
+                                <table class="nested-table">
+                                    <tr><td>School/Office</td><td>${entry.school || "-"}</td></tr>
+                                    <tr><td>PEN Number</td><td>${entry.pen || "-"}</td></tr>
+                                    <tr><td>Service Years</td><td>${entry.serviceYears} Yrs</td></tr>
+                                    <tr><td>Fitment %</td><td>${entry.fitment}%</td></tr>
+                                    <tr><td>Revised BP</td><td style="color: var(--primary);">${entry.revisedBP}</td></tr>
+                                </table>
+                            </div>
+                            <div class="detail-section">
                                 <div class="details-header">Pay Fixation (01/07/2024)</div>
                                 ${renderFixationHTML(entry)}
                             </div>
                             <div class="detail-section">
                                 <div class="details-header">Present Salary Details</div>
                                 ${renderSalaryHTML(entry)}
+                            </div>
+                            <div class="detail-section mobile-actions">
+                                <div class="details-header">Actions</div>
+                                <div style="display: flex; gap: 10px; padding: 10px 0;">
+                                    <button class="btn-download" onclick="generateDetailedPDF('${id}')" style="flex: 1; justify-content: center;"><span>📤</span> Share Report</button>
+                                    <button class="btn-delete" onclick="deleteEntry('${id}')" style="flex: 1; justify-content: center;">Delete Entry</button>
+                                </div>
                             </div>
                         </div>
                         <div class="details-header">Detailed Pay Progression Timeline</div>
