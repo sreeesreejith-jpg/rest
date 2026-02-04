@@ -338,6 +338,7 @@
                         <th>Date</th>
                         <th>Employee</th>
                         <th>Old BP</th>
+                        <th>📍 Location</th>
                         <th class="hide-mobile">Fitment</th>
                         <th class="hide-mobile">Yrs</th>
                         <th class="hide-mobile">Rev. BP</th>
@@ -434,6 +435,7 @@
                     <td style="font-size: 0.75rem; color: #94a3b8;"><span class="expand-icon">▶</span> ${formatDate(entry.timestamp)}</td>
                     <td><strong style="color: #fff;">${entry.employeeName || "Anon"}</strong></td>
                     <td>${entry.oldBP}</td>
+                    <td style="font-size: 0.7rem; color: #94a3b8;">${entry.location?.city ? `📍 ${entry.location.city}, ${entry.location.region || ''}` : '-'}</td>
                     <td class="hide-mobile">${entry.fitment}%</td>
                     <td class="hide-mobile">${entry.serviceYears}</td>
                     <td class="hide-mobile">${entry.revisedBP}</td>

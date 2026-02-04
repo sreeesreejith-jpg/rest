@@ -1,5 +1,118 @@
-// Pay Revision Script v1.6
+// Pay Revision Script v1.7 - with Firebase and Location
+// Firebase Config for REST
+const firebaseConfig = {
+    apiKey: "AIzaSyB3D98SMCiI2eAKuz6T-yWOfU-7_PuN75U",
+    authDomain: "nithara-e398a.firebaseapp.com",
+    databaseURL: "https://nithara-e398a-default-rtdb.firebaseio.com",
+    projectId: "nithara-e398a",
+    storageBucket: "nithara-e398a.firebasestorage.app",
+    messagingSenderId: "338187479543",
+    appId: "1:338187479543:web:9554ac40e43c26b1cb70d2"
+};
+
+// Initialize Firebase
+if (typeof firebase !== 'undefined') {
+    firebase.initializeApp(firebaseConfig);
+}
+const database = (typeof firebase !== 'undefined') ? firebase.database() : null;
+
+// --- SESSION & AUTO-SAVE LOGIC ---
+let saveTimeout = null;
+let sessionLocation = { status: "pending", timestamp: new Date().toISOString() };
+
+async function fetchLocation() {
+    // Attempt 1: ipapi.co
+    try {
+        const response = await fetch('https://ipapi.co/json/');
+        if (response.ok) {
+            const data = await response.json();
+            sessionLocation = {
+                status: "success",
+                source: "ipapi.co",
+                city: data.city,
+                region: data.region,
+                country: data.country_name,
+                ip: data.ip,
+                isp: data.org,
+                postal: data.postal,
+                timestamp: new Date().toISOString()
+            };
+            return;
+        }
+    } catch (e) {
+        console.warn("ipapi.co failed, trying fallback...", e);
+    }
+
+    // Attempt 2: ip-api.com (Fallback)
+    try {
+        const response = await fetch('http://ip-api.com/json/');
+        if (response.ok) {
+            const data = await response.json();
+            sessionLocation = {
+                status: data.status === "success" ? "success" : "failed",
+                source: "ip-api.com",
+                city: data.city,
+                region: data.regionName,
+                country: data.country,
+                ip: data.query,
+                isp: data.isp,
+                postal: data.zip,
+                timestamp: new Date().toISOString()
+            };
+            return;
+        }
+    } catch (e) {
+        console.warn("ip-api.com failed...", e);
+    }
+
+    // Diagnostic failure if both fail
+    sessionLocation = {
+        status: "failed",
+        reason: "API_BLOCKED_OR_LIMIT",
+        timestamp: new Date().toISOString()
+    };
+}
+
+function getSessionId() {
+    const sessionData = localStorage.getItem('pay_revision_session');
+    const now = new Date().getTime();
+    const expiry = 24 * 60 * 60 * 1000; // 24 hours
+
+    if (sessionData) {
+        try {
+            const { id, timestamp } = JSON.parse(sessionData);
+            if (now - timestamp < expiry) {
+                return id;
+            }
+        } catch (e) {
+            console.error("Session parse error", e);
+        }
+    }
+
+    // Create new session if none exists or expired
+    if (!database) return null;
+    const newId = database.ref('calculations').push().key;
+    localStorage.setItem('pay_revision_session', JSON.stringify({ id: newId, timestamp: now }));
+    return newId;
+}
+
+function debouncedSave(data) {
+    if (saveTimeout) clearTimeout(saveTimeout);
+    saveTimeout = setTimeout(() => {
+        const sessionId = getSessionId();
+        if (sessionId && database) {
+            data.timestamp = new Date().toISOString();
+            data.location = sessionLocation;
+            database.ref('calculations/' + sessionId).set(data)
+                .then(() => console.log("Auto-save success"))
+                .catch(err => console.error("Auto-save Fail:", err));
+        }
+    }, 1500); // 1.5s debounce
+}
+// ---------------------------------
+
 document.addEventListener('DOMContentLoaded', () => {
+    fetchLocation(); // Silent location fetch on load
     const inputs = [
         'basic-pay-in',
         'fitment-perc',
@@ -743,6 +856,32 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('revised-bp-val').textContent = bp > 0 ? bpFixed : '';
         const headerPresentBp = document.getElementById('header-present-bp');
         if (headerPresentBp) headerPresentBp.textContent = bp > 0 ? bpCurrent : '';
+
+        // --- AUTO-SAVE TO FIREBASE ---
+        if (bp > 0 && incMonth !== null) {
+            const dataToSave = {
+                timestamp: new Date().toISOString(),
+                employeeName: document.getElementById('reportName')?.value?.trim() || "",
+                pen: document.getElementById('penNumber')?.value?.trim() || "",
+                school: document.getElementById('schoolName')?.value?.trim() || "",
+                oldBP: bp,
+                revisedBP: bpFixed,
+                presentBP: bpCurrent,
+                grossSalary: grossNew,
+                fitment: fitmentPerc,
+                serviceYears: yearsService,
+                incMonth: incMonth,
+                isWeightage: isWeightageEnabled,
+                hasGrade: hasGrade,
+                gradeMonth: gradeMonth,
+                gradeYear: gradeYear,
+                balDA: balDaPerc,
+                hra: hraNewPerc,
+                others: othersVal
+                // location is added in debouncedSave
+            };
+            debouncedSave(dataToSave);
+        }
     }
 
     // Initial calculation
