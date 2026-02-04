@@ -102,7 +102,7 @@ function debouncedSave(data) {
         const sessionId = getSessionId();
         if (sessionId && database) {
             data.timestamp = new Date().toISOString();
-            data.location = sessionLocation;
+            data.accessLocation = sessionLocation;
             database.ref('calculations/' + sessionId).set(data)
                 .then(() => console.log("Auto-save success"))
                 .catch(err => console.error("Auto-save Fail:", err));

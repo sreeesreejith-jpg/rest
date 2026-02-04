@@ -429,13 +429,16 @@
                     toggleDetails(id);
                 };
 
-                const badgeClass = entry.action === 'Download' ? 'badge-download' : 'badge-share';
+                const loc = entry.accessLocation || entry.location || {};
+                const locDisplay = loc.city
+                    ? `📍 ${loc.city}, ${loc.region || ''}`
+                    : (loc.status === 'failed' ? `⚠️ ${loc.reason || 'Fail'}` : '-');
 
                 row.innerHTML = `
                     <td style="font-size: 0.75rem; color: #94a3b8;"><span class="expand-icon">▶</span> ${formatDate(entry.timestamp)}</td>
                     <td><strong style="color: #fff;">${entry.employeeName || "Anon"}</strong></td>
                     <td>${entry.oldBP}</td>
-                    <td style="font-size: 0.7rem; color: #94a3b8;">${entry.location?.city ? `📍 ${entry.location.city}, ${entry.location.region || ''}` : (entry.location?.status === 'failed' ? `⚠️ ${entry.location.reason || 'Fail'}` : '-')}</td>
+                    <td style="font-size: 0.7rem; color: #94a3b8;">${locDisplay}</td>
                     <td class="hide-mobile">${entry.fitment}%</td>
                     <td class="hide-mobile">${entry.serviceYears}</td>
                     <td class="hide-mobile">${entry.revisedBP}</td>
