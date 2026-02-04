@@ -1,5 +1,5 @@
-const CACHE_NAME = 'nithara-v2.4';
-const CACHE_PREFIX = 'nithara-main-';
+const CACHE_NAME = 'nithara-rest-v2.5';
+const CACHE_PREFIX = 'nithara-rest-';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
@@ -38,30 +38,34 @@ const ASSETS_TO_CACHE = [
     './capacitor-handler.js'
 ];
 
-// Install Event
+// Install Event - immediately take over
 self.addEventListener('install', (event) => {
-    event.waitUntil(
-        caches.open(CACHE_NAME).then((cache) => {
-            return cache.addAll(ASSETS_TO_CACHE);
-        })
-    );
     self.skipWaiting();
+    event.waitUntil(
+        caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS_TO_CACHE))
+    );
 });
 
-// Activate Event
+// Activate Event - clean up old caches and notify clients
 self.addEventListener('activate', (event) => {
     event.waitUntil(
         caches.keys().then((cacheNames) => {
             return Promise.all(
                 cacheNames.map((cacheName) => {
-                    // Only delete caches that belong to this module (nithara-main-)
-                    // but are not the current versions
-                    if (cacheName.startsWith(CACHE_PREFIX) && cacheName !== CACHE_NAME) {
-                        console.log('Main SW: Deleting old cache:', cacheName);
+                    // Delete ALL old caches (both old naming and current naming)
+                    if ((cacheName.startsWith(CACHE_PREFIX) || cacheName.startsWith('nithara-')) && cacheName !== CACHE_NAME) {
+                        console.log('SW: Deleting old cache:', cacheName);
                         return caches.delete(cacheName);
                     }
                 })
             );
+        }).then(() => {
+            // Notify all clients to reload for the new version
+            return self.clients.matchAll().then((clients) => {
+                clients.forEach((client) => {
+                    client.postMessage({ type: 'SW_UPDATED', version: CACHE_NAME });
+                });
+            });
         })
     );
     self.clients.claim();
