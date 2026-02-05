@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=2.2">
+    <link rel="stylesheet" href="style.css?v=2.3">
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="../icon-192.png">
     <meta name="theme-color" content="#3b82f6">
@@ -389,16 +389,22 @@
         </section>
 
 
-        <footer>email: sreee.sreejith@gmail.com
-
+        <footer>
+            <div style="font-size: 0.7rem; opacity: 0.6; text-align: center;">© 2026 Pay Revision Tool</div>
         </footer>
     </div>
 
-    <script src="script.js?v=2.2"></script>
+    <script src="script.js?v=2.3"></script>
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js').catch(err => console.log('SW fail', err));
+            });
+            let refreshing;
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (refreshing) return;
+                window.location.reload();
+                refreshing = true;
             });
         }
     </script>

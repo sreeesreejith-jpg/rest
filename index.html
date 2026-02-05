@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Apps Portal - Access all your finance and utility tools in one place">
     <title>Rest | Premium Apps Suite</title>
-    <link rel="stylesheet" href="style.css?v=2.0">
+    <link rel="stylesheet" href="style.css?v=2.1">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0f172a">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,29 +15,13 @@
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./service-worker.js').then((registration) => {
-                    // Check for updates every 60 seconds
-                    setInterval(() => registration.update(), 60000);
-
-                    // Listen for new service worker activation
-                    registration.addEventListener('updatefound', () => {
-                        const newWorker = registration.installing;
-                        newWorker.addEventListener('statechange', () => {
-                            if (newWorker.state === 'activated') {
-                                // New version available, reload to get latest
-                                window.location.reload();
-                            }
-                        });
-                    });
-                });
+                navigator.serviceWorker.register('./service-worker.js');
             });
-
-            // Listen for service worker messages
-            navigator.serviceWorker.addEventListener('message', (event) => {
-                if (event.data && event.data.type === 'SW_UPDATED') {
-                    console.log('New version available:', event.data.version);
-                    window.location.reload();
-                }
+            let refreshing;
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (refreshing) return;
+                window.location.reload();
+                refreshing = true;
             });
         }
     </script>
@@ -141,8 +125,7 @@
         </main>
     </div>
     <div class="footer-email">
-        <div>email: sreee.sreejith@gmail.com</div>
-        <div style="font-size: 0.7rem; margin-top: 0.5rem; opacity: 0.6;">© 2026 Rest Apps Premium Suite</div>
+        <div style="font-size: 0.7rem; opacity: 0.6;">© 2026 Rest Apps Premium Suite</div>
     </div>
 </body>
 
