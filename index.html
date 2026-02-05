@@ -18,7 +18,7 @@
                 navigator.serviceWorker.register('./service-worker.js').then((registration) => {
                     // Check for updates every 60 seconds
                     setInterval(() => registration.update(), 60000);
-                    
+
                     // Listen for new service worker activation
                     registration.addEventListener('updatefound', () => {
                         const newWorker = registration.installing;
@@ -31,7 +31,7 @@
                     });
                 });
             });
-            
+
             // Listen for service worker messages
             navigator.serviceWorker.addEventListener('message', (event) => {
                 if (event.data && event.data.type === 'SW_UPDATED') {
@@ -63,6 +63,14 @@
                         🔄
                     </div>
                     <h2 class="app-title">Pay Revision</h2>
+                </a>
+
+                <!-- App Card: Pay Revision Logs -->
+                <a href="./pay-revision/admin.html" class="app-card">
+                    <div class="icon-wrapper">
+                        📊
+                    </div>
+                    <h2 class="app-title">Pay Revision Logs</h2>
                 </a>
 
                 <!-- App Card: Pension/DCRG -->
