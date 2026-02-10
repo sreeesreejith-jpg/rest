@@ -123,7 +123,11 @@ document.addEventListener('DOMContentLoaded', () => {
         'grade-check',
         'grade-month',
         'grade-year',
-        'others-val'
+        'others-val',
+        'reportName',
+        'penNumber',
+        'schoolName',
+        'feedback'
     ];
 
     const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -877,7 +881,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 gradeYear: gradeYear,
                 balDA: balDaPerc,
                 hra: hraNewPerc,
-                others: othersVal
+                others: othersVal,
+                feedback: document.getElementById('feedback')?.value?.trim() || ""
                 // location is added in debouncedSave
             };
             debouncedSave(dataToSave);

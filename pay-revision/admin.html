@@ -459,13 +459,26 @@
                 // Timeline HTML generation
                 const timelineHTML = renderTimelineHTML(entry);
 
-                // Mapping logic for requested format
-                const revStages = entry.revisedPayStages ? entry.revisedPayStages.map(s => `<div>${s.event.replace('Annual ', '')}: Rs. ${s.amount.replace('Rs. ', '')}</div>`).join('') : '-';
-                const preStages = entry.prerevisedPayStages ? entry.prerevisedPayStages.map(s => `<div>${s.event.replace('Annual ', '')}: Rs. ${s.amount.replace('Rs. ', '')}</div>`).join('') : '-';
+                // Mapping logic for requested format: Handle both string lists and numeric objects
+                const formatValue = (val) => {
+                    if (typeof val === 'number') return val.toLocaleString();
+                    if (typeof val === 'string') return val.replace('Rs. ', '');
+                    return val || "0";
+                };
+
+                const revStages = entry.revisedPayStages ? entry.revisedPayStages.map(s => `<div>${s.event.replace('Annual ', '')}: Rs. ${formatValue(s.amount)}</div>`).join('') : '-';
+                const preStages = entry.prerevisedPayStages ? entry.prerevisedPayStages.map(s => `<div>${s.event.replace('Annual ', '')}: Rs. ${formatValue(s.amount)}</div>`).join('') : '-';
 
                 detailsRow.innerHTML = `
                     <td colspan="11">
                         <div style="background: rgba(15, 23, 42, 0.5); padding: 20px; border-radius: 8px; line-height: 1.6; color: #cbd5e1;">
+                            <div style="margin-bottom: 20px;">
+                                <strong style="color: #4ade80; display: block; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; margin-bottom: 10px;">User Feedback</strong>
+                                <div style="font-size: 1.1rem; color: #fff; background: rgba(74, 222, 128, 0.1); padding: 10px; border-radius: 4px; border-left: 4px solid #4ade80;">
+                                    ${entry.userFeedback || entry.feedback || "feedback -"}
+                                </div>
+                            </div>
+
                             <div style="margin-bottom: 20px;">
                                 <strong style="color: var(--primary); display: block; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; margin-bottom: 10px;">Personal & Professional Details</strong>
                                 <div>Name: ${entry.employeeName || "Anon"}</div>
@@ -480,23 +493,25 @@
                                 <strong style="color: var(--primary); display: block; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; margin-bottom: 10px;">Calculation Configuration</strong>
                                 <div>Pre-revised Basic Pay (01/07/2024): ${entry.oldBP}</div>
                                 <div>Fitment Percentage: ${entry.fitment}%</div>
-                                <div>Increment Month: ${entry.incrementMonth || entry.incMonth || "-"}</div>
+                                <div>Increment Month: ${entry.incrementMonth || (entry.incMonth !== undefined ? getMonthName(entry.incMonth) : "-")}</div>
                                 <div>Grade Date: ${entry.gradeDate || "-"}</div>
                             </div>
 
                             <div style="margin-bottom: 20px;">
                                 <strong style="color: var(--primary); display: block; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; margin-bottom: 10px;">Benefit Summary</strong>
-                                <div>Revised BP (Fixed on 01/07/2024): Rs. ${entry.revisedBPJuly2024 || entry.revisedBP}</div>
-                                <div>Revised BP (Current): Rs. ${entry.revisedBPCurrent || entry.presentBP}</div>
-                                <div>Monthly Gross Salary: Rs. ${entry.grossSalary}</div>
-                                <div>DA Arrear: ${entry.daArrear || "-"}</div>
-                                <div>Pay Revision Arrear: ${entry.payRevArrear || "-"}</div>
-                                <div style="font-weight: bold; color: #4ade80;">Total Combined Arrear: ${entry.totalArrear || "-"}</div>
+                                <div>Revised BP (Fixed on 01/07/2024): Rs. ${formatValue(entry.revisedBPJuly2024 || entry.revisedBP)}</div>
+                                <div>Revised BP (Current): Rs. ${formatValue(entry.revisedBPCurrent || entry.presentBP)}</div>
+                                <div>Monthly Gross Salary: Rs. ${formatValue(entry.grossSalary)}</div>
+                                <div>DA Arrear: ${entry.daArrear || "0"}</div>
+                                <div>Pay Revision Arrear: ${entry.payRevArrear || "0"}</div>
+                                <div style="font-weight: bold; color: #4ade80;">Total Combined Arrear: ${entry.totalArrear || "0"}</div>
                             </div>
 
                             <div style="margin-bottom: 20px;">
                                 <strong style="color: var(--primary); display: block; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; margin-bottom: 10px;">Revised Pay Progression Timeline</strong>
-                                ${revStages}
+                                <div class="timeline-container" style="padding:0; gap:10px;">
+                                    ${timelineHTML}
+                                </div>
                             </div>
 
                             <div style="margin-bottom: 20px;">
@@ -636,6 +651,13 @@
                 if (entry.employeeName) { doc.text(`Employee: ${entry.employeeName}`, 14, headerY); headerY += 5; }
                 if (entry.pen) { doc.text(`PEN Number: ${entry.pen}`, 14, headerY); headerY += 5; }
                 if (entry.school) { doc.text(`School/Office: ${entry.school}`, 14, headerY); headerY += 5; }
+                const feedbackText = entry.userFeedback || entry.feedback;
+                if (feedbackText) {
+                    doc.setFontSize(9);
+                    doc.setTextColor(240); // Lighter text for the note
+                    doc.text(`Note: ${feedbackText}`, 14, headerY);
+                    headerY += 5;
+                }
 
                 // 2. Main Summary Table (Matching Nithara)
                 const timestamp = new Date(entry.timestamp);
@@ -796,7 +818,17 @@
             const fitmentPerc = parseFloat(entry.fitment) || 0;
             const yearsService = parseInt(entry.serviceYears) || 0;
             const isWeightageEnabled = entry.isWeightage || (yearsService > 0);
-            const incMonth = entry.incMonth !== "" ? parseInt(entry.incMonth) : null;
+
+            // Robust month detection
+            let incMonth = entry.incMonth !== undefined && entry.incMonth !== "" && entry.incMonth !== null ? parseInt(entry.incMonth) : null;
+            if (incMonth === null && entry.incrementMonth) {
+                const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+                const monthsShort = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                incMonth = months.indexOf(entry.incrementMonth);
+                if (incMonth === -1) incMonth = monthsShort.indexOf(entry.incrementMonth);
+                if (incMonth === -1) incMonth = null;
+            }
+
             const hasGrade = entry.hasGrade || false;
             const gradeMonth = parseInt(entry.gradeMonth);
             const gradeYear = parseInt(entry.gradeYear);
@@ -836,18 +868,22 @@
                 return Math.ceil((stage + da + fitment + weightage) / 100) * 100;
             });
 
-            const baseIndex = payStagesList.indexOf(bp);
-            if (baseIndex === -1) return [];
+            const baseIndex = payStagesList.indexOf(Math.round(bp));
+            if (baseIndex === -1) {
+                console.warn("BP not found in scale:", bp);
+                return [["Initial BP (Not found in scale)", `Rs. ${bp.toLocaleString()}`]];
+            }
 
-            let rows = [["Revised BP On 01/07/2024", `Rs. ${revisedScale[baseIndex]}`]];
+            let rows = [["Revised BP On 01/07/2024", `Rs. ${revisedScale[baseIndex].toLocaleString()}`]];
             let currentIndex = baseIndex;
             const monthsShort = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
             events.forEach(event => {
                 currentIndex += event.steps;
                 currentIndex = Math.min(currentIndex, revisedScale.length - 1);
+                const stepPay = revisedScale[currentIndex];
                 const label = (event.type === 'increment' ? 'Increment' : 'Grade') + ` on ${monthsShort[event.date.getMonth()]} ${event.date.getFullYear()}`;
-                rows.push([label, `Rs. ${revisedScale[currentIndex]}`]);
+                rows.push([label, `Rs. ${stepPay.toLocaleString()}`]);
             });
 
             return rows;
