@@ -894,12 +894,14 @@
                 let checkDate = new Date(startDate);
                 while (checkDate <= today) {
                     if (checkDate.getMonth() === incMonth && checkDate.getTime() !== startDate.getTime()) {
-                        events.push({ type: 'increment', date: new Date(checkDate), steps: 1 });
+                        // Increments always happen on the 1st of the month
+                        const incDate = new Date(checkDate.getFullYear(), checkDate.getMonth(), 1);
+                        events.push({ type: 'increment', date: incDate, steps: 1 });
                     }
                     const gradeThreshold = new Date(2024, 7, 1);
                     if (hasGrade && checkDate.getMonth() === gradeMonth && checkDate.getFullYear() === gradeYear && checkDate >= gradeThreshold) {
                         // Use exact grade date if available, otherwise 1st of month
-                        let gDate = new Date(checkDate);
+                        let gDate = new Date(checkDate.getFullYear(), checkDate.getMonth(), 1);
                         if (entry.gradeDate) {
                             const dparts = entry.gradeDate.split('/');
                             if (dparts.length === 3) gDate = new Date(parseInt(dparts[2]), parseInt(dparts[1]) - 1, parseInt(dparts[0]));
@@ -908,10 +910,8 @@
                     }
                     checkDate.setMonth(checkDate.getMonth() + 1);
                 }
-                events.sort((a, b) => {
-                    if (a.date.getTime() !== b.date.getTime()) return a.date - b.date;
-                    return a.type === 'increment' ? -1 : 1;
-                });
+                // Sort purely by date - no type preference
+                events.sort((a, b) => a.date.getTime() - b.date.getTime());
 
                 const revisedScale = payStagesList.map(stage => {
                     const da = Math.round(stage * 0.31);
