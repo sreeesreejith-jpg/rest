@@ -459,44 +459,63 @@
                 // Timeline HTML generation
                 const timelineHTML = renderTimelineHTML(entry);
 
+                // Mapping logic for requested format
+                const revStages = entry.revisedPayStages ? entry.revisedPayStages.map(s => `<div>${s.event.replace('Annual ', '')}: Rs. ${s.amount.replace('Rs. ', '')}</div>`).join('') : '-';
+                const preStages = entry.prerevisedPayStages ? entry.prerevisedPayStages.map(s => `<div>${s.event.replace('Annual ', '')}: Rs. ${s.amount.replace('Rs. ', '')}</div>`).join('') : '-';
+
                 detailsRow.innerHTML = `
                     <td colspan="11">
-                        <div class="expand-details-grid">
-                            <div class="detail-section">
-                                <div class="details-header">Registration Details</div>
-                                <table class="nested-table">
-                                    <tr><td>School/Office</td><td>${entry.school || "-"}</td></tr>
-                                    <tr><td>PEN Number</td><td>${entry.pen || "-"}</td></tr>
-                                    <tr><td>Service Years</td><td>${entry.serviceYears} Yrs</td></tr>
-                                    <tr><td>Fitment %</td><td>${entry.fitment}%</td></tr>
-                                    <tr><td>Revised BP</td><td style="color: var(--primary);">${entry.revisedBP}</td></tr>
-                                </table>
+                        <div style="background: rgba(15, 23, 42, 0.5); padding: 20px; border-radius: 8px; line-height: 1.6; color: #cbd5e1;">
+                            <div style="margin-bottom: 20px;">
+                                <strong style="color: var(--primary); display: block; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; margin-bottom: 10px;">Personal & Professional Details</strong>
+                                <div>Name: ${entry.employeeName || "Anon"}</div>
+                                <div>PEN Number: ${entry.pen || "(Not provided)"}</div>
+                                <div>School/Office: ${entry.school || "(Not provided)"}</div>
+                                <div>Service Years: ${entry.serviceYears || "0"}</div>
+                                <div>App Version: ${entry.appVersion || "1.8-location"}</div>
+                                <div>Timestamp: ${new Date(entry.timestamp).toLocaleString()}</div>
                             </div>
-                            <div class="detail-section">
-                                <div class="details-header">Pay Fixation (01/07/2024)</div>
-                                ${renderFixationHTML(entry)}
+
+                            <div style="margin-bottom: 20px;">
+                                <strong style="color: var(--primary); display: block; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; margin-bottom: 10px;">Calculation Configuration</strong>
+                                <div>Pre-revised Basic Pay (01/07/2024): ${entry.oldBP}</div>
+                                <div>Fitment Percentage: ${entry.fitment}%</div>
+                                <div>Increment Month: ${entry.incrementMonth || entry.incMonth || "-"}</div>
+                                <div>Grade Date: ${entry.gradeDate || "-"}</div>
                             </div>
-                            <div class="detail-section timeline-section" style="grid-column: 1 / -1;">
-                                <div class="details-header">Detailed Pay Progression Timeline</div>
-                                <div class="timeline-container" style="padding: 10px 0;">
-                                    ${timelineHTML}
-                                </div>
+
+                            <div style="margin-bottom: 20px;">
+                                <strong style="color: var(--primary); display: block; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; margin-bottom: 10px;">Benefit Summary</strong>
+                                <div>Revised BP (Fixed on 01/07/2024): Rs. ${entry.revisedBPJuly2024 || entry.revisedBP}</div>
+                                <div>Revised BP (Current): Rs. ${entry.revisedBPCurrent || entry.presentBP}</div>
+                                <div>Monthly Gross Salary: Rs. ${entry.grossSalary}</div>
+                                <div>DA Arrear: ${entry.daArrear || "-"}</div>
+                                <div>Pay Revision Arrear: ${entry.payRevArrear || "-"}</div>
+                                <div style="font-weight: bold; color: #4ade80;">Total Combined Arrear: ${entry.totalArrear || "-"}</div>
                             </div>
-                            <div class="detail-section">
-                                <div class="details-header">Present Salary Details</div>
-                                ${renderSalaryHTML(entry)}
+
+                            <div style="margin-bottom: 20px;">
+                                <strong style="color: var(--primary); display: block; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; margin-bottom: 10px;">Revised Pay Progression Timeline</strong>
+                                ${revStages}
                             </div>
-                            <div class="detail-section mobile-actions">
-                                <div class="details-header">Actions</div>
-                                <div style="display: flex; gap: 10px; padding: 10px 0;">
-                                    <button class="btn-download" onclick="generateDetailedPDF('${id}')" style="flex: 1; justify-content: center;"><span>📤</span> Share Report</button>
-                                    <button class="btn-delete" onclick="deleteEntry('${id}')" style="flex: 1; justify-content: center;">Delete Entry</button>
-                                </div>
+
+                            <div style="margin-bottom: 20px;">
+                                <strong style="color: var(--primary); display: block; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; margin-bottom: 10px;">Pre-revised Pay History</strong>
+                                ${preStages}
                             </div>
-                        </div>
-                        <div class="details-header">Detailed Pay Progression Timeline</div>
-                        <div class="timeline-container">
-                            ${timelineHTML}
+
+                            <div style="margin-bottom: 20px;">
+                                <strong style="color: var(--primary); display: block; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; margin-bottom: 10px;">Access Location Info</strong>
+                                <div>City: ${loc.city || "-"}</div>
+                                <div>Region: ${loc.region || "-"}, ${loc.country || "India"}</div>
+                                <div>ISP: ${loc.isp || "-"}</div>
+                                <div>IP Address: ${loc.ip || "-"}</div>
+                            </div>
+
+                            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                                <button class="btn-download" onclick="generateDetailedPDF('${id}')"><span>📤</span> Share Report</button>
+                                <button class="btn-delete" onclick="deleteEntry('${id}')">Delete Entry</button>
+                            </div>
                         </div>
                     </td>
                 `;
