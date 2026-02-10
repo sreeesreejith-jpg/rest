@@ -457,7 +457,8 @@
                 detailsRow.className = 'details-row';
 
                 // Timeline HTML generation
-                const timelineHTML = renderTimelineHTML(entry);
+                const timelineHTML = renderTimelineHTML(entry, 'revised');
+                const preHistoryHTML = renderTimelineHTML(entry, 'pre');
 
                 // Mapping logic for requested format: Handle both string lists and numeric objects
                 const formatValue = (val) => {
@@ -516,7 +517,9 @@
 
                             <div style="margin-bottom: 20px;">
                                 <strong style="color: var(--primary); display: block; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; margin-bottom: 10px;">Pre-revised Pay History</strong>
-                                ${preStages}
+                                <div class="timeline-container" style="padding:0; gap:10px;">
+                                    ${preHistoryHTML}
+                                </div>
                             </div>
 
                             <div style="margin-bottom: 20px;">
@@ -754,6 +757,32 @@
                     });
                 }
 
+                // 4b. Pre-revised History (NEW in PDF)
+                const preRows = calculateTimelineRows(entry, 'pre');
+                if (preRows.length > 0) {
+                    let preY = doc.lastAutoTable.finalY + 15;
+                    const estHeightPre = (preRows.length * 8) + 20;
+                    if (preY + estHeightPre > 285) {
+                        doc.addPage();
+                        preY = 20;
+                    }
+                    doc.setFontSize(14);
+                    doc.setTextColor(100, 116, 139);
+                    doc.text("Pre-revised Pay History (2021-2024)", 14, preY);
+
+                    doc.autoTable({
+                        startY: preY + 5,
+                        head: [['History Event', 'Component BP']],
+                        body: preRows,
+                        theme: 'grid',
+                        headStyles: { fillColor: [100, 116, 139] },
+                        columnStyles: {
+                            0: { cellWidth: 'auto' },
+                            1: { halign: 'right', fontStyle: 'bold', cellWidth: 50 }
+                        }
+                    });
+                }
+
                 // 5. Present Salary Details (Green Header)
                 currentY = doc.lastAutoTable.finalY + 15;
                 if (currentY + 60 > 285) {
@@ -813,7 +842,23 @@
             return months[index] || "-";
         }
 
-        function calculateTimelineRows(entry) {
+        function effectiveGradeInfo(entry) {
+            let hasGrade = entry.hasGrade || false;
+            let gradeMonth = parseInt(entry.gradeMonth);
+            let gradeYear = parseInt(entry.gradeYear);
+
+            if ((isNaN(gradeMonth) || !gradeMonth) && entry.gradeDate) {
+                const parts = entry.gradeDate.split('/');
+                if (parts.length === 3) {
+                    gradeMonth = parseInt(parts[1]) - 1; // 0-indexed
+                    gradeYear = parseInt(parts[2]);
+                    hasGrade = true;
+                }
+            }
+            return { hasGrade, gradeMonth, gradeYear };
+        }
+
+        function calculateTimelineRows(entry, mode = 'revised') {
             const bp = parseFloat(entry.oldBP) || 0;
             const fitmentPerc = parseFloat(entry.fitment) || 0;
             const yearsService = parseInt(entry.serviceYears) || 0;
@@ -829,64 +874,88 @@
                 if (incMonth === -1) incMonth = null;
             }
 
-            const hasGrade = entry.hasGrade || false;
-            const gradeMonth = parseInt(entry.gradeMonth);
-            const gradeYear = parseInt(entry.gradeYear);
-
             if (!bp || incMonth === null) return [];
 
-            const startDate = new Date(2024, 6, 1);
-            let today = new Date();
-            const jan2026 = new Date(2026, 0, 1);
-            if (today < jan2026) today = jan2026;
-
-            let events = [];
-            let checkDate = new Date(startDate);
-            while (checkDate <= today) {
-                if (incMonth !== null && checkDate.getMonth() === incMonth && checkDate.getTime() !== startDate.getTime()) {
-                    events.push({ type: 'increment', date: new Date(checkDate), steps: 1 });
-                }
-                const gradeThreshold = new Date(2024, 7, 1);
-                if (hasGrade && checkDate.getMonth() === gradeMonth && checkDate.getFullYear() === gradeYear && checkDate >= gradeThreshold) {
-                    events.push({ type: 'grade', date: new Date(checkDate), steps: 2 });
-                }
-                checkDate.setMonth(checkDate.getMonth() + 1);
-            }
-            events.sort((a, b) => {
-                if (a.date.getTime() !== b.date.getTime()) return a.date - b.date;
-                return a.type === 'increment' ? -1 : 1;
-            });
-
-            const revisedScale = payStagesList.map(stage => {
-                const da = Math.round(stage * 0.31);
-                const fitment = Math.round(stage * (fitmentPerc / 100));
-                let weightage = 0;
-                if (isWeightageEnabled) {
-                    const weightagePerc = Math.min(yearsService * 0.5, 15);
-                    weightage = Math.round(stage * (weightagePerc / 100));
-                }
-                return Math.ceil((stage + da + fitment + weightage) / 100) * 100;
-            });
-
             const baseIndex = payStagesList.indexOf(Math.round(bp));
-            if (baseIndex === -1) {
-                console.warn("BP not found in scale:", bp);
-                return [["Initial BP (Not found in scale)", `Rs. ${bp.toLocaleString()}`]];
+            if (baseIndex === -1) return [];
+
+            if (mode === 'revised') {
+                const { hasGrade, gradeMonth, gradeYear } = effectiveGradeInfo(entry);
+                const startDate = new Date(2024, 6, 1);
+                let today = new Date();
+                const jan2026 = new Date(2026, 0, 1);
+                if (today < jan2026) today = jan2026;
+
+                let events = [];
+                let checkDate = new Date(startDate);
+                while (checkDate <= today) {
+                    if (checkDate.getMonth() === incMonth && checkDate.getTime() !== startDate.getTime()) {
+                        events.push({ type: 'increment', date: new Date(checkDate), steps: 1 });
+                    }
+                    const gradeThreshold = new Date(2024, 7, 1);
+                    if (hasGrade && checkDate.getMonth() === gradeMonth && checkDate.getFullYear() === gradeYear && checkDate >= gradeThreshold) {
+                        events.push({ type: 'grade', date: new Date(checkDate), steps: 2 });
+                    }
+                    checkDate.setMonth(checkDate.getMonth() + 1);
+                }
+                events.sort((a, b) => {
+                    if (a.date.getTime() !== b.date.getTime()) return a.date - b.date;
+                    return a.type === 'increment' ? -1 : 1;
+                });
+
+                const revisedScale = payStagesList.map(stage => {
+                    const da = Math.round(stage * 0.31);
+                    const fitment = Math.round(stage * (fitmentPerc / 100));
+                    let weightage = 0;
+                    if (isWeightageEnabled) {
+                        const weightagePerc = Math.min(yearsService * 0.5, 15);
+                        weightage = Math.round(stage * (weightagePerc / 100));
+                    }
+                    return Math.ceil((stage + da + fitment + weightage) / 100) * 100;
+                });
+
+                let rows = [["Revised BP On 01/07/2024", `Rs. ${revisedScale[baseIndex].toLocaleString()}`]];
+                let currentIndex = baseIndex;
+                const monthsShort = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+                events.forEach(event => {
+                    currentIndex += event.steps;
+                    currentIndex = Math.min(currentIndex, revisedScale.length - 1);
+                    const label = (event.type === 'increment' ? 'Increment' : (event.type === 'grade' ? 'grade availed' : 'Event')) + ` on ${monthsShort[event.date.getMonth()]} ${event.date.getFullYear()}`;
+                    rows.push([label, `Rs. ${revisedScale[currentIndex].toLocaleString()}`]);
+                });
+                return rows;
+            } else {
+                // PRE-HISTORY MODE
+                let rows = [];
+                let currentIndex = baseIndex;
+                let checkDate = new Date(2024, 6, 1); // 01/07/2024
+                const stopDate = new Date(2021, 2, 1); // 01/03/2021 (Start of 2021 revision)
+
+                while (checkDate > stopDate) {
+                    checkDate.setMonth(checkDate.getMonth() - 1);
+                    if (checkDate.getMonth() === incMonth) {
+                        currentIndex--;
+                        if (currentIndex < 0) currentIndex = 0;
+                        const label = `Increment on ${getMonthName(incMonth).slice(0, 3)} ${checkDate.getFullYear()}`;
+                        rows.unshift([label, `Rs. ${payStagesList[currentIndex].toLocaleString()}`]);
+                    }
+                }
+                rows.unshift(["BP on 01/03/2021", `Rs. ${payStagesList[currentIndex].toLocaleString()}`]);
+                return rows;
             }
+        }
 
-            let rows = [["Revised BP On 01/07/2024", `Rs. ${revisedScale[baseIndex].toLocaleString()}`]];
-            let currentIndex = baseIndex;
-            const monthsShort = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        function renderTimelineHTML(entry, mode = 'revised') {
+            const rows = calculateTimelineRows(entry, mode);
+            if (rows.length === 0) return mode === 'revised' ? '<div style="padding: 20px; color: #64748b;">No progression data available.</div>' : '<div style="padding: 20px; color: #64748b;">-</div>';
 
-            events.forEach(event => {
-                currentIndex += event.steps;
-                currentIndex = Math.min(currentIndex, revisedScale.length - 1);
-                const stepPay = revisedScale[currentIndex];
-                const label = (event.type === 'increment' ? 'Increment' : 'Grade') + ` on ${monthsShort[event.date.getMonth()]} ${event.date.getFullYear()}`;
-                rows.push([label, `Rs. ${stepPay.toLocaleString()}`]);
-            });
-
-            return rows;
+            return rows.map(item => `
+                <div class="timeline-item">
+                    <span class="timeline-label">${item[0]}</span>
+                    <span class="timeline-value">${item[1]}</span>
+                </div>
+            `).join('');
         }
     </script>
 </body>
