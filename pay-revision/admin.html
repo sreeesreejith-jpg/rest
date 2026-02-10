@@ -879,6 +879,10 @@
             const baseIndex = payStagesList.indexOf(Math.round(bp));
             if (baseIndex === -1) return [];
 
+            const formatTimelineDate = (date) => {
+                return `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()}`;
+            };
+
             if (mode === 'revised') {
                 const { hasGrade, gradeMonth, gradeYear } = effectiveGradeInfo(entry);
                 const startDate = new Date(2024, 6, 1);
@@ -894,7 +898,13 @@
                     }
                     const gradeThreshold = new Date(2024, 7, 1);
                     if (hasGrade && checkDate.getMonth() === gradeMonth && checkDate.getFullYear() === gradeYear && checkDate >= gradeThreshold) {
-                        events.push({ type: 'grade', date: new Date(checkDate), steps: 2 });
+                        // Use exact grade date if available, otherwise 1st of month
+                        let gDate = new Date(checkDate);
+                        if (entry.gradeDate) {
+                            const dparts = entry.gradeDate.split('/');
+                            if (dparts.length === 3) gDate = new Date(parseInt(dparts[2]), parseInt(dparts[1]) - 1, parseInt(dparts[0]));
+                        }
+                        events.push({ type: 'grade', date: gDate, steps: 2 });
                     }
                     checkDate.setMonth(checkDate.getMonth() + 1);
                 }
@@ -916,12 +926,12 @@
 
                 let rows = [["Revised BP On 01/07/2024", `Rs. ${revisedScale[baseIndex].toLocaleString()}`]];
                 let currentIndex = baseIndex;
-                const monthsShort = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
                 events.forEach(event => {
                     currentIndex += event.steps;
                     currentIndex = Math.min(currentIndex, revisedScale.length - 1);
-                    const label = (event.type === 'increment' ? 'Increment' : (event.type === 'grade' ? 'grade availed' : 'Event')) + ` on ${monthsShort[event.date.getMonth()]} ${event.date.getFullYear()}`;
+                    const dateStr = formatTimelineDate(event.date);
+                    const label = (event.type === 'increment' ? 'Increment' : (event.type === 'grade' ? 'grade availed' : 'Event')) + ` on ${dateStr}`;
                     rows.push([label, `Rs. ${revisedScale[currentIndex].toLocaleString()}`]);
                 });
                 return rows;
@@ -930,15 +940,15 @@
                 let rows = [];
                 let currentIndex = baseIndex;
                 let checkDate = new Date(2024, 6, 1); // 01/07/2024
-                const stopDate = new Date(2021, 2, 1); // 01/03/2021 (Start of 2021 revision)
+                const stopDate = new Date(2021, 2, 1); // 01/03/2021
 
                 while (checkDate > stopDate) {
                     checkDate.setMonth(checkDate.getMonth() - 1);
                     if (checkDate.getMonth() === incMonth) {
+                        const label = `Increment on 01/${(incMonth + 1).toString().padStart(2, '0')}/${checkDate.getFullYear()}`;
+                        rows.unshift([label, `Rs. ${payStagesList[currentIndex].toLocaleString()}`]);
                         currentIndex--;
                         if (currentIndex < 0) currentIndex = 0;
-                        const label = `Increment on ${getMonthName(incMonth).slice(0, 3)} ${checkDate.getFullYear()}`;
-                        rows.unshift([label, `Rs. ${payStagesList[currentIndex].toLocaleString()}`]);
                     }
                 }
                 rows.unshift(["BP on 01/03/2021", `Rs. ${payStagesList[currentIndex].toLocaleString()}`]);
