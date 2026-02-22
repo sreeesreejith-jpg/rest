@@ -579,6 +579,20 @@ body.pdf-mode .detail-item {
 
 
 
+/* DCRG Limit Note */
+.limit-note {
+    width: 100%;
+    margin-top: 8px;
+    padding: 10px 14px;
+    background: rgba(245, 158, 11, 0.15);
+    border: 1px solid rgba(245, 158, 11, 0.4);
+    border-radius: 8px;
+    font-size: 0.82rem;
+    color: #fbbf24;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
 /* Footer & Extras */
 .disclaimer {
     text-align: center;

@@ -187,10 +187,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const calculateAll = (source) => {
         const bp = parseFloat(basicPayInput.value) || 0;
         const da = parseFloat(daPercentageInput.value) || 0;
-        let years = parseFloat(serviceYearsInput.value) || 0;
+        const actualYears = parseFloat(serviceYearsInput.value) || 0;
+        let years = actualYears;
 
-        // Validation & Constraints
-        if (years > 33) years = 33; // Max DCRG service is 33
         // Note: Rules say min 10, but we process whatever is there for instant feedback
 
         // 1. Last Pay (for DCRG)
@@ -235,7 +234,16 @@ document.addEventListener('DOMContentLoaded', () => {
         let dcrgQS = (years > 33) ? 33 : years;
         let dcrg = lastPay * (dcrgQS / 2);
 
-        if (dcrg > 1700000) dcrg = 1700000;
+        // Show note if DCRG exceeds official limit
+        const dcrgNote = document.getElementById('dcrgLimitNote');
+        if (dcrgNote) {
+            if (dcrg > 1700000) {
+                dcrgNote.style.display = 'block';
+                dcrgNote.innerHTML = `⚠️ Official DCRG limit is <strong>₹17,00,000</strong>. Actual eligible amount: <strong>₹17,00,000</strong>`;
+            } else {
+                dcrgNote.style.display = 'none';
+            }
+        }
 
         // 7. Total Benefits
         const totalLumpSum = commutationAmount + dcrg;
@@ -250,7 +258,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Update Details List
         if (calcLastPay) calcLastPay.textContent = formatAmount(lastPay);
-        if (calcQS) calcQS.textContent = years;
+        if (calcQS) calcQS.textContent = actualYears;
         if (calcAvgEmoluments) calcAvgEmoluments.textContent = formatAmount(avgEmoluments);
         if (calcBasicPension) calcBasicPension.textContent = formatAmount(pension);
         if (calcCommutation) calcCommutation.textContent = formatAmount(commutationAmount);
@@ -426,8 +434,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 columnStyles: { 1: { halign: 'right', fontStyle: 'bold' } }
             });
 
+            // Add DCRG limit note to PDF if visible in UI
+            const uiLimitNote = document.getElementById('dcrgLimitNote');
+            if (uiLimitNote && uiLimitNote.style.display !== 'none') {
+                doc.setFontSize(9);
+                doc.setTextColor(180, 83, 9); // Amber-like color
+                doc.text(uiLimitNote.innerText, 14, doc.lastAutoTable.finalY + 8);
+            }
+
             // 6. Footer
-            const finalY = doc.lastAutoTable.finalY + 15;
+            const finalY = doc.lastAutoTable.finalY + 18;
             doc.setFontSize(10);
             doc.setTextColor(100);
             doc.text("Email: sreee.sreejith@gmail.com", 14, finalY);
