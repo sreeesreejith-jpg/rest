@@ -1,13 +1,13 @@
 // Pay Revision Script v1.7 - with Firebase and Location
 // Firebase Config for REST
 const firebaseConfig = {
-    apiKey: "AIzaSyB3D98SMCiI2eAKuz6T-yWOfU-7_PuN75U",
+    apiKey: "AIzaSyDlm0UKlrZD4XubEi2HZGZdSjqTluPVE8I",
     authDomain: "nithara-e398a.firebaseapp.com",
     databaseURL: "https://nithara-e398a-default-rtdb.firebaseio.com",
     projectId: "nithara-e398a",
     storageBucket: "nithara-e398a.firebasestorage.app",
-    messagingSenderId: "338187479543",
-    appId: "1:338187479543:web:9554ac40e43c26b1cb70d2"
+    messagingSenderId: "320618747543",
+    appId: "1:320618747543:web:0650ac40e42c3081c97bd2"
 };
 
 // Initialize Firebase
