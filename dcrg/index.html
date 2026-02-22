@@ -154,16 +154,36 @@
             </section>
         </main>
 
-        <!-- Section 3 (was 1): Summary -->
+        <!-- Section 3: Summary -->
         <div class="sticky-dashboard summary-card hidden" id="benefits-section">
             <div class="main-benefit">
-                <span class="label">Summary</span>
+                <span class="label">Total Benefits (Actual)</span>
                 <span class="value blinking" id="totalBenefitsHeader">0</span>
-                <small class="sub-label">(Commutation + DCRG)</small>
+                <small class="sub-label">(Commutation + Full DCRG)</small>
+
+                <!-- New Breakdown Grid -->
+                <div class="summary-breakdown">
+                    <div class="breakdown-item">
+                        <span class="br-label">Full DCRG</span>
+                        <span class="br-value" id="summaryDcrgActual">0</span>
+                    </div>
+                    <div class="breakdown-item" id="cappedDcrgRow">
+                        <span class="br-label">Official DCRG</span>
+                        <span class="br-value text-amber" id="summaryDcrgCapped">0</span>
+                    </div>
+                    <div class="breakdown-item" id="diffDcrgRow">
+                        <span class="br-label">Difference</span>
+                        <span class="br-value text-success" id="summaryDcrgDiff">0</span>
+                    </div>
+                </div>
 
                 <div class="secondary-highlight">
                     <span class="value" id="balanceHeader">0</span>
                     <span class="label">Balance Pension Next Month Onwards</span>
+                </div>
+
+                <div class="official-total-note" id="officialTotalRow">
+                    Official Total (with Capped DCRG): <strong id="totalBenefitsCapped">0</strong>
                 </div>
             </div>
         </div>

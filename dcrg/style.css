@@ -629,6 +629,57 @@ body.pdf-mode .detail-item {
     }
 }
 
+/* Summary Breakdown Styles */
+.summary-breakdown {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin: 15px 0;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.breakdown-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.br-label {
+    font-size: 0.7rem;
+    color: #64748b;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+}
+
+.br-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #e2e8f0;
+}
+
+.official-total-note {
+    margin-top: 15px;
+    font-size: 0.85rem;
+    color: #94a3b8;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.official-total-note strong {
+    color: #fbbf24;
+    /* Amber */
+    font-size: 1rem;
+}
+
+.text-amber {
+    color: #fbbf24 !important;
+}
+
 @media (max-width: 480px) {
     .sticky-dashboard {
         padding: 15px;

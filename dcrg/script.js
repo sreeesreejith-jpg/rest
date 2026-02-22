@@ -232,28 +232,55 @@ document.addEventListener('DOMContentLoaded', () => {
         // Formula: (Last Pay) * (Qualifying Service / 2)
         // Rule: Max 33 years
         let dcrgQS = (years > 33) ? 33 : years;
-        let dcrg = lastPay * (dcrgQS / 2);
+        let dcrgActual = lastPay * (dcrgQS / 2);
+        let dcrgCapped = (dcrgActual > 1700000) ? 1700000 : dcrgActual;
 
         // Show note if DCRG exceeds official limit
         const dcrgNote = document.getElementById('dcrgLimitNote');
-        if (dcrgNote) {
-            if (dcrg > 1700000) {
+        const summaryDcrgCappedRow = document.getElementById('cappedDcrgRow');
+        const diffDcrgRow = document.getElementById('diffDcrgRow');
+        const officialTotalRow = document.getElementById('officialTotalRow');
+
+        if (dcrgActual > 1700000) {
+            const dcrgDiff = dcrgActual - 1700000;
+            if (dcrgNote) {
                 dcrgNote.style.display = 'block';
                 dcrgNote.innerHTML = `⚠️ Official DCRG limit is <strong>₹17,00,000</strong>. Actual eligible amount: <strong>₹17,00,000</strong>`;
-            } else {
-                dcrgNote.style.display = 'none';
             }
+            if (summaryDcrgCappedRow) summaryDcrgCappedRow.style.display = 'flex';
+            if (diffDcrgRow) diffDcrgRow.style.display = 'flex';
+            if (officialTotalRow) officialTotalRow.style.display = 'block';
+
+            if (document.getElementById('summaryDcrgDiff')) {
+                document.getElementById('summaryDcrgDiff').textContent = formatAmount(dcrgDiff);
+            }
+        } else {
+            if (dcrgNote) dcrgNote.style.display = 'none';
+            if (summaryDcrgCappedRow) summaryDcrgCappedRow.style.display = 'none';
+            if (diffDcrgRow) diffDcrgRow.style.display = 'none';
+            if (officialTotalRow) officialTotalRow.style.display = 'none';
         }
 
         // 7. Total Benefits
-        const totalLumpSum = commutationAmount + dcrg;
+        const totalLumpSumActual = commutationAmount + dcrgActual;
+        const totalLumpSumCapped = commutationAmount + dcrgCapped;
 
         // Update Dashboard
         const displayValue = (val) => (val > 0) ? formatAmount(val) : "0";
 
-        if (totalBenefitsHeader) totalBenefitsHeader.textContent = displayValue(totalLumpSum);
+        if (totalBenefitsHeader) totalBenefitsHeader.textContent = displayValue(totalLumpSumActual);
+        if (document.getElementById('totalBenefitsCapped')) {
+            document.getElementById('totalBenefitsCapped').textContent = displayValue(totalLumpSumCapped);
+        }
+        if (document.getElementById('summaryDcrgActual')) {
+            document.getElementById('summaryDcrgActual').textContent = displayValue(dcrgActual);
+        }
+        if (document.getElementById('summaryDcrgCapped')) {
+            document.getElementById('summaryDcrgCapped').textContent = displayValue(dcrgCapped);
+        }
+
         if (commuteHeader) commuteHeader.textContent = displayValue(commutationAmount);
-        if (dcrgHeader) dcrgHeader.textContent = displayValue(dcrg);
+        if (dcrgHeader) dcrgHeader.textContent = displayValue(dcrgActual);
         if (balanceHeader) balanceHeader.textContent = displayValue(balancePension);
 
         // Update Details List
@@ -264,7 +291,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (calcCommutation) calcCommutation.textContent = formatAmount(commutationAmount);
         if (calcReducedPension) calcReducedPension.textContent = formatAmount(balancePension);
         if (calcCommutablePension) calcCommutablePension.textContent = formatAmount(commutablePension);
-        if (calcDcrg) calcDcrg.textContent = formatAmount(dcrg);
+        if (calcDcrg) calcDcrg.textContent = formatAmount(dcrgActual);
         if (dispCommFactor) dispCommFactor.textContent = commFactor.toFixed(2);
 
         // Update Steps with Actual Values
